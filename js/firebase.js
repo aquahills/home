@@ -11,24 +11,19 @@ const auth = firebase.auth();
 
 function googleLogin() {
   const provider = new firebase.auth.GoogleAuthProvider();
-
-  auth.signInWithPopup(provider)
-    .then(async (result) => {
-      const user = result.user;
-
-      localStorage.setItem("user", user.email);
-
-      await api("saveUser", {
-        email: user.email,
-        name: user.displayName || "",
-        phone: "",
-        role: "customer"
-      });
-
-      window.location.href = "/";
-    })
-    .catch((error) => {
-      alert("Login failed. Please try again.");
-      console.error(error);
-    });
+  firebase.auth().signInWithRedirect(provider);
 }
+
+firebase.auth().getRedirectResult()
+  .then((result) => {
+    if (result.user) {
+      const email = result.user.email;
+      localStorage.setItem("user", email);
+      window.location.href = "/";
+    }
+  })
+  .catch((error) => {
+    console.error(error);
+    alert("Login failed. Please try again.");
+  });
+
