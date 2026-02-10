@@ -289,7 +289,10 @@ header {
     gap: 16px;
     padding: 16px;
   }
-
+.header-title {
+    font-size: 16px;
+    text-align: center;
+  }
   nav {
     width: 100%;
     justify-content: center;
