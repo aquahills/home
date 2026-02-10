@@ -43,6 +43,13 @@ header {
   top: 0;
   z-index: 10;
 }
+.hero-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--secondary);
+  margin-bottom: 24px;
+  text-align: center;
+}
 
 .hero-product {
   display: flex;
@@ -132,7 +139,7 @@ nav button:hover {
 /* ===== CAROUSEL ===== */
 
 .carousel-container {
-  padding: 80px 40px;
+  padding: 100px 40px 80px;
   overflow-x: hidden;
 }
 
