@@ -221,3 +221,61 @@ header {
 .hidden {
   display: none;
 }
+/* =========================
+   RESPONSIVE LAYOUT
+   ========================= */
+
+@media (max-width: 1024px) {
+  .carousel {
+    gap: 24px;
+  }
+
+  .card {
+    min-width: 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  nav {
+    width: 100%;
+    justify-content: center;
+  }
+
+  nav button {
+    flex: 1;
+    max-width: 160px;
+  }
+
+  .carousel-container {
+    padding: 40px 16px;
+  }
+
+  .carousel {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .center {
+    padding: 40px 16px;
+  }
+
+  input,
+  select,
+  button {
+    width: 100%;
+    max-width: 420px;
+  }
+}
+
+@media (max-wid
