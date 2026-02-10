@@ -12,24 +12,35 @@ const auth = firebase.auth();
 function startGoogleLogin() {
   localStorage.setItem("loginIntent", "true");
   const provider = new firebase.auth.GoogleAuthProvider();
-  firebase.auth().signInWithRedirect(provider);
+  auth.signInWithRedirect(provider);
 }
 
-firebase.auth().onAuthStateChanged((user) => {
-  if (user) {
-    localStorage.setItem("user", user.email);
-    localStorage.setItem("name", user.displayName || "");
+/**
+ * GLOBAL PROMISE: resolves only when Firebase auth is ready
+ */
+window.waitForAuth = function () {
+  return new Promise(resolve => {
+    const unsub = auth.onAuthStateChanged(user => {
+      if (user) {
+        unsub();
+        resolve(user);
+      }
+    });
+  });
+};
 
-    // ✅ redirect ONLY if user explicitly clicked login
-    if (
-      localStorage.getItem("loginIntent") === "true" &&
-      location.pathname.endsWith("/login.html")
-    ) {
-      localStorage.removeItem("loginIntent");
-      window.location.replace("/");
-    }
-  } else {
-    localStorage.removeItem("user");
-    localStorage.removeItem("name");
+auth.onAuthStateChanged(async user => {
+  if (!user) return;
+
+  localStorage.setItem("user", user.email);
+  localStorage.setItem("name", user.displayName || "");
+
+  // Redirect ONLY after login.html
+  if (
+    localStorage.getItem("loginIntent") === "true" &&
+    location.pathname.endsWith("login.html")
+  ) {
+    localStorage.removeItem("loginIntent");
+    window.location.replace("index.html");
   }
 });
