@@ -37,13 +37,19 @@ header {
   height: 52px;
 }
 
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
 nav button {
   background: transparent;
   border: 1px solid var(--primary);
   color: var(--primary);
-  padding: 10px 18px;
-  margin-left: 12px;
-  border-radius: 30px;
+  padding: 12px 26px;
+  border-radius: 999px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -54,6 +60,7 @@ nav button:hover {
   color: white;
   transform: translateY(-2px);
 }
+
 
 /* ===== CENTER PAGES ===== */
 
