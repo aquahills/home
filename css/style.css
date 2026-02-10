@@ -203,3 +203,21 @@ header {
 .carousel {
   justify-content: center;
 }
+.orders-btn {
+  position: relative;
+}
+
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: red;
+  color: white;
+  font-size: 11px;
+  padding: 3px 7px;
+  border-radius: 50%;
+}
+
+.hidden {
+  display: none;
+}
