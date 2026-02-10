@@ -14,13 +14,22 @@ function isLoggedIn() {
   return localStorage.getItem("user");
 }
 
-function orderNow() {
+async function orderNow() {
   if (!isLoggedIn()) {
     window.location.href = "login.html";
+    return;
+  }
+
+  const email = localStorage.getItem("user");
+  const user = await api("getUser", { email });
+
+  if (!user.house) {
+    window.location.href = "address.html";
   } else {
     window.location.href = "order.html";
   }
 }
+
 
 function goLogin() {
   window.location.href = "login.html";
