@@ -33,3 +33,24 @@ function goOrders() {
     window.location.href = "orders.html";
   }
 }
+function updateBadge() {
+  const badge = document.getElementById("orderBadge");
+  if (!badge) return;
+
+  const user = localStorage.getItem("user");
+  if (!user) return;
+
+  const orders = JSON.parse(localStorage.getItem("orders") || "[]");
+  const unseen = orders.filter(o =>
+    o.status === "Pending" &&
+    (user === ADMIN_EMAIL || o.email === user)
+  ).length;
+
+  if (unseen > 0) {
+    badge.innerText = unseen;
+    badge.classList.remove("hidden");
+  } else {
+    badge.classList.add("hidden");
+  }
+}
+updateBadge();
