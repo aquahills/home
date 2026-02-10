@@ -19,6 +19,14 @@ body {
   color: var(--secondary);
   min-height: 100vh;
 }
+.carousel-container {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0) 0%,
+      rgba(234,244,255,0.6) 100%
+    );
+}
 
 
 /* ===== HEADER ===== */
@@ -154,13 +162,13 @@ nav button:hover {
 }
 
 .card:hover {
-  transform: scale(1.05) translateY(-10px);
+  transform: translateY(-12px) scale(1.04);
 }
 
 /* depth illusion */
 .carousel:hover .card:not(:hover) {
-  transform: scale(0.92);
-  opacity: 0.75;
+  transform: scale(0.96);
+  opacity: 0.85;
 }
 
 .card h2 {
