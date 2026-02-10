@@ -18,6 +18,8 @@
     return;
   }
 
+  await api("markOrdersSeen", { email });
+
   const user = await api("getUser", { email });
   const res = await api("getOrders", { email });
   const orders = res.orders || [];
@@ -44,12 +46,10 @@
       <p><strong>Ordered At:</strong> ${new Date(o.createdAt).toLocaleString()}</p>
     `;
 
-    /* CUSTOMER */
     if (user.role === "customer") {
       html += `<p><strong>Total:</strong> ₹${o.total}</p>`;
     }
 
-    /* DELIVERY */
     if (user.role === "delivery" && o.customer) {
       html += `
         <p><strong>Name:</strong> ${o.customer.name}</p>
@@ -61,7 +61,6 @@
       `;
     }
 
-    /* ADMIN */
     if (user.role === "admin") {
       html += `
         <p><strong>Email:</strong> ${o.email}</p>
@@ -70,7 +69,6 @@
       `;
     }
 
-    /* STATUS ACTIONS */
     if (user.role !== "customer" && o.status === "Pending") {
       html += `
         <button onclick="updateStatus('${o.orderId}','Fulfilled')">
@@ -89,6 +87,7 @@ async function updateStatus(orderId, status) {
   location.reload();
 }
 </script>
+
 
 </body>
 </html>
