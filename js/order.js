@@ -1,22 +1,29 @@
-const price = getPrice();
-const qtyInput = document.getElementById("qty");
-const total = document.getElementById("total");
+let price = 75;
 
-total.innerText = price;
+(async () => {
+  const settings = await api("getSettings");
+  price = Number(settings.price || 75);
+  document.getElementById("total").innerText = price;
+})();
 
-qtyInput.addEventListener("input", () => {
-  total.innerText = qtyInput.value * price;
+document.getElementById("qty").addEventListener("input", e => {
+  document.getElementById("total").innerText = e.target.value * price;
 });
 
-function confirmOrder() {
-  saveOrder({
-    email: localStorage.getItem("user"),
-    qty: qtyInput.value,
-    total: qtyInput.value * price,
-    status: "Pending",
-    seen: false,
-    time: new Date().toISOString()
+async function confirmOrder() {
+  const email = localStorage.getItem("user");
+
+  const res = await api("createOrder", {
+    email,
+    bottles: document.getElementById("qty").value,
+    total: document.getElementById("total").innerText
   });
-  alert("Order placed");
+
+  if (res.error === "ADDRESS_REQUIRED") {
+    window.location.href = "address.html";
+    return;
+  }
+
+  alert("Order placed successfully");
   window.location.href = "orders.html";
 }
