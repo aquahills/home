@@ -15,6 +15,9 @@
 <script src="js/api.js"></script>
 <script>
   let deliveryUsers = [];
+  const allUsersRes = await api("getAllUsers", { email });
+deliveryUsers = (allUsersRes.users || []).filter(u => u.role === "delivery");
+
 (async () => {
   const email = localStorage.getItem("user");
   if (!email) {
@@ -85,11 +88,9 @@
     if (user.role !== "customer" && o.status === "Pending") {
       html += `
         <button onclick="confirmDelivered('${o.orderId}')">
-  Delivered
+Delivered
 </button>
 
-          Mark Fulfilled
-        </button>
       `;
     }
 
