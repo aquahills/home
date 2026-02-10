@@ -8,9 +8,16 @@
 
 <h2>Login / Register</h2>
 
-<input type="email" id="email" placeholder="Enter email">
-<button onclick="login()">Continue</button>
+<button onclick="googleLogin()">
+  Continue with Google
+</button>
 
-<script src="js/auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+<script src="js/api.js"></script>
+<script src="js/firebase.js"></script>
+
 </body>
+
 </html>
