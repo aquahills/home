@@ -1,10 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Aquahills</title>
+  <meta charset="UTF-8">
+  <title>Aquahills Beverages</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <h1>Welcome to Aquahills</h1>
-  <p>My website is live on GitHub Pages.</p>
+
+<header>
+  <img src="assets/logo.png" class="logo">
+  <nav>
+    <button onclick="goOrders()">Orders</button>
+    <button onclick="goLogin()">Login / Register</button>
+  </nav>
+</header>
+
+<section class="carousel-container">
+  <div class="carousel" id="carousel">
+
+    <div class="card" onclick="orderNow()">
+      <h2>Order Now</h2>
+      <p>Fresh 20L water delivered to your home</p>
+    </div>
+
+    <div class="card">
+      <h2>About Us</h2>
+      <p>Aquahills Beverages delivers pure and safe drinking water with reliability and care.</p>
+    </div>
+
+    <div class="card">
+      <h2>Contact Us</h2>
+      <p>📞 +91 99106 57711</p>
+      <p>📧 aquahillsbeverages@gmail.com</p>
+    </div>
+
+  </div>
+</section>
+
+<script src="js/auth.js"></script>
+<script src="js/carousel.js"></script>
 </body>
 </html>
