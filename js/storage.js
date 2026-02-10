@@ -1,5 +1,5 @@
 function getPrice() {
-  return localStorage.getItem("price") || 75;
+  return Number(localStorage.getItem("price") || 75);
 }
 
 function saveOrder(order) {
@@ -8,7 +8,10 @@ function saveOrder(order) {
   localStorage.setItem("orders", JSON.stringify(orders));
 }
 
-function getOrders(email) {
-  let orders = JSON.parse(localStorage.getItem("orders") || "[]");
-  return orders.filter(o => o.email === email);
+function getAllOrders() {
+  return JSON.parse(localStorage.getItem("orders") || "[]");
+}
+
+function updateOrders(orders) {
+  localStorage.setItem("orders", JSON.stringify(orders));
 }
