@@ -1,15 +1,22 @@
 const price = getPrice();
-document.getElementById("total").innerText = price;
+const qtyInput = document.getElementById("qty");
+const total = document.getElementById("total");
 
-document.getElementById("qty").addEventListener("input", e => {
-  document.getElementById("total").innerText = e.target.value * price;
+total.innerText = price;
+
+qtyInput.addEventListener("input", () => {
+  total.innerText = qtyInput.value * price;
 });
 
 function confirmOrder() {
   saveOrder({
     email: localStorage.getItem("user"),
-    qty: document.getElementById("qty").value,
-    status: "Pending"
+    qty: qtyInput.value,
+    total: qtyInput.value * price,
+    status: "Pending",
+    seen: false,
+    time: new Date().toISOString()
   });
   alert("Order placed");
+  window.location.href = "orders.html";
 }
