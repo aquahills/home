@@ -41,7 +41,7 @@ function googleLogin() {
       });
 
       // Go back to home page
-      window.location.href = "../index.html";
+      window.location.href = "index.html";
     })
     .catch((error) => {
       alert("Login failed. Please try again.");
