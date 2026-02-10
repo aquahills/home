@@ -2,7 +2,7 @@ let price = 75;
 
 (async () => {
   const settings = await api("getSettings");
-  price = Number(settings.price || 75);
+  price = Number(settings?.price || 75);
   document.getElementById("total").innerText = price;
 })();
 
