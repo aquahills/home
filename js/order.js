@@ -11,13 +11,9 @@ document.getElementById("qty").addEventListener("input", e => {
 });
 
 async function confirmOrder() {
-  const email = localStorage.getItem("user");
-
   const res = await api("createOrder", {
-  bottles: Number(document.getElementById("qty").value)
-});
-
-
+    bottles: Number(document.getElementById("qty").value)
+  });
 
   if (res.error === "ADDRESS_REQUIRED") {
     window.location.href = "address.html";
