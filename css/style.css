@@ -276,6 +276,14 @@ header {
     width: 100%;
     max-width: 420px;
   }
+  button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
 }
 
 @media (max-wid
