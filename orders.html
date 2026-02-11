@@ -49,60 +49,82 @@ document.addEventListener("DOMContentLoaded", () => {
 
   firebase.auth().onAuthStateChanged(async (user) => {
 
+    const content = document.getElementById("contentArea");
+
     if (!user) {
       window.location.href = "login.html";
       return;
     }
 
-    const content = document.getElementById("contentArea");
+    try {
 
-    const userDoc = await db.collection("users").doc(user.uid).get();
-    const role = userDoc.data().role;
+      const userDoc = await db.collection("users").doc(user.uid).get();
+      const role = userDoc.data().role;
 
-    let query;
+      let query;
 
-    if (role === "admin") {
-      query = db.collection("orders").orderBy("createdAt", "desc");
-    } else if (role === "delivery") {
-      query = db.collection("orders")
-                .where("assignedTo", "==", user.uid)
-                .orderBy("createdAt", "desc");
-    } else {
-      query = db.collection("orders")
-                .where("customerId", "==", user.uid)
-                .orderBy("createdAt", "desc");
-    }
+      if (role === "admin") {
+        query = db.collection("orders").orderBy("createdAt", "desc");
+      } 
+      else if (role === "delivery") {
+        query = db.collection("orders")
+                  .where("assignedTo", "==", user.uid)
+                  .orderBy("createdAt", "desc");
+      } 
+      else {
+        query = db.collection("orders")
+                  .where("customerId", "==", user.uid)
+                  .orderBy("createdAt", "desc");
+      }
 
-    const snapshot = await query.get();
+      const snapshot = await query.get();
 
-    if (snapshot.empty) {
+      if (snapshot.empty) {
+        content.innerHTML = `
+          <div class="card" style="text-align:center;">
+            <h2 style="margin-bottom:10px;">No Orders Yet</h2>
+            <p style="margin-bottom:20px; opacity:0.8;">
+              You haven’t placed any orders yet. Start your first delivery now.
+            </p>
+            <button class="primary-btn" onclick="window.location.href='order.html'">
+              Order Now
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      let html = "";
+
+      snapshot.forEach(doc => {
+        const o = doc.data();
+        html += `
+          <div class="card">
+            <p><strong>Status:</strong> ${o.status}</p>
+            <p><strong>Bottles:</strong> ${o.bottles}</p>
+            <p><strong>Total:</strong> ₹${o.total}</p>
+          </div>
+        `;
+      });
+
+      content.innerHTML = html;
+
+    } catch (error) {
+      console.error("Orders load error:", error);
+
       content.innerHTML = `
-        <div class="card">
-          <h2>No Orders Found</h2>
+        <div class="card" style="text-align:center;">
+          <h2>Unable to load orders</h2>
+          <p style="opacity:0.8;">Please refresh the page.</p>
         </div>
       `;
-      return;
     }
-
-    let html = "";
-
-    snapshot.forEach(doc => {
-      const o = doc.data();
-      html += `
-        <div class="card">
-          <p><strong>Status:</strong> ${o.status}</p>
-          <p><strong>Bottles:</strong> ${o.bottles}</p>
-          <p><strong>Total:</strong> ₹${o.total}</p>
-        </div>
-      `;
-    });
-
-    content.innerHTML = html;
 
   });
 
 });
 </script>
+
 
 </body>
 </html>
