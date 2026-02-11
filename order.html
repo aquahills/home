@@ -71,12 +71,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const settingsDoc = await db.collection("settings").doc("global").get();
-    if (settingsDoc.exists) {
-      currentPrice = settingsDoc.data().price || 75;
-    }
+    const settings = settingsDoc.data() || {};
+    currentPrice = settings.price || 75;
 
     updateTotal();
-
   });
 
 });
@@ -106,51 +104,57 @@ async function confirmOrder() {
   const qty = Number(document.getElementById("qty").value);
 
   const userDoc = await db.collection("users").doc(user.uid).get();
-  const userData = userDoc.data();
+  const userData = userDoc.data() || {};
+  const address = userData.address || {};
 
-  // Profile validation
+  // Profile validation (no alert)
   if (!userData.phone ||
-      !userData.address.house ||
-      !userData.address.city ||
-      !userData.address.pincode) {
+      !address.house ||
+      !address.city ||
+      !address.pincode) {
 
-    alert("Almost done. Please complete your delivery details so we can process your order.");
-    window.location.href = "address.html";
+    window.location.href = "address.html?incomplete=true";
     return;
   }
 
-  const settingsRef = db.collection("settings").doc("global");
-  const settingsDoc = await settingsRef.get();
-  const settings = settingsDoc.data();
+  const settingsDoc = await db.collection("settings").doc("global").get();
+  const settings = settingsDoc.data() || {};
+
+  const price = settings.price || 75;
+  const autoAssign = settings.autoAssign;
+  const agents = settings.deliveryAgents || [];
 
   let assignedTo = null;
 
-  if (settings.autoAssign && settings.deliveryAgents.length > 0) {
-
-    const index = settings.lastAssignedIndex || 0;
-    assignedTo = settings.deliveryAgents[index];
-
-    const nextIndex = (index + 1) % settings.deliveryAgents.length;
-
-    await settingsRef.update({
-      lastAssignedIndex: nextIndex
-    });
+  // SAFE AUTO ASSIGN (NO settings update)
+  if (autoAssign && agents.length > 0) {
+    const randomIndex = Math.floor(Math.random() * agents.length);
+    assignedTo = agents[randomIndex];
   }
 
   await db.collection("orders").add({
     customerId: user.uid,
     customerEmail: user.email,
     bottles: qty,
-    total: qty * settings.price,
+    total: qty * price,
     status: "Pending",
     assignedTo: assignedTo,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
-  alert("Order placed successfully.");
-  window.location.href = "orders.html";
+  // Success UI inside page (no alert, no redirect)
+  document.querySelector(".card").innerHTML = `
+    <h2 style="margin-bottom:15px;">Order Placed Successfully</h2>
+    <p style="margin-bottom:20px; opacity:0.8;">
+      Your order has been received and is being processed.
+    </p>
+    <button class="primary-btn" onclick="window.location.href='orders.html'">
+      Track Order
+    </button>
+  `;
 }
 </script>
+
 
 </body>
 </html>
