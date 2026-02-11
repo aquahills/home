@@ -16,15 +16,18 @@ function startGoogleLogin() {
   auth.signInWithPopup(provider)
     .then(async result => {
 
-      const token = await result.user.getIdToken();
+      const user = result.user;
 
-      localStorage.setItem("user", result.user.email);
-      localStorage.setItem("name", result.user.displayName || "");
+      localStorage.setItem("user", user.email);
+      localStorage.setItem("name", user.displayName || "");
 
-      // AUTO SAVE USER TO SHEET
-      await api("saveUser", {
-        name: result.user.displayName || ""
-      });
+      try {
+        await api("saveUser", {
+          name: user.displayName || ""
+        });
+      } catch (err) {
+        console.error("Backend save failed:", err);
+      }
 
       window.location.href = "index.html";
     })
