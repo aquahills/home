@@ -3,19 +3,20 @@
 <head>
   <title>Order Water</title>
   <link rel="stylesheet" href="css/style.css">
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-
 </head>
 <body class="center">
 
 <h2>Select Bottles</h2>
 
 <input type="number" id="qty" min="1" value="1">
-<p>Total Price: ₹<span id="total">75</span></p>
+<p>Total Price: ₹<span id="total">0</span></p>
 
-<button onclick="confirmOrder()">Confirm</button>
+<button onclick="confirmOrder()">Confirm Order</button>
 
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+<script src="js/firebase.js"></script>
 <script src="js/api.js"></script>
 <script src="js/order.js"></script>
 
