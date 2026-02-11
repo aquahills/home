@@ -7,17 +7,21 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
 </head>
 
 <body>
 
 <header>
   <img src="assets/logo.png" class="logo" />
-  <nav id="navArea"></nav>
+  <nav>
+    <button onclick="window.location.href='order.html'">Order</button>
+    <button onclick="window.location.href='index.html'">Home</button>
+  </nav>
 </header>
 
-<main class="center" id="contentArea"></main>
+<main class="center" id="contentArea">
+  <div class="card"><h2>Loading...</h2></div>
+</main>
 
 <footer class="footer">
   <div class="footer-container">
@@ -43,9 +47,6 @@
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 
-  const content = document.getElementById("contentArea");
-  const nav = document.getElementById("navArea");
-
   firebase.auth().onAuthStateChanged(async (user) => {
 
     if (!user) {
@@ -53,29 +54,28 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const profile = await api("getUser");
+    const content = document.getElementById("contentArea");
 
-    if (!profile || profile.error) {
-      content.innerHTML = "<h2>Error loading profile</h2>";
-      return;
-    }
+    const userDoc = await db.collection("users").doc(user.uid).get();
+    const role = userDoc.data().role;
 
-    nav.innerHTML = `
-      ${profile.role === "admin" ? 
-        `<button onclick="window.location.href='admin.html'">⚙</button>` : ""}
-      <button onclick="window.location.href='order.html'">Order</button>
-      <button onclick="window.location.href='index.html'">Home</button>
-    `;
+    let query;
 
-    let res;
-
-    if (profile.role === "admin" || profile.role === "delivery") {
-      res = await api("getAllOrders");
+    if (role === "admin") {
+      query = db.collection("orders").orderBy("createdAt", "desc");
+    } else if (role === "delivery") {
+      query = db.collection("orders")
+                .where("assignedTo", "==", user.uid)
+                .orderBy("createdAt", "desc");
     } else {
-      res = await api("getOrders");
+      query = db.collection("orders")
+                .where("customerId", "==", user.uid)
+                .orderBy("createdAt", "desc");
     }
 
-    if (!res.orders || res.orders.length === 0) {
+    const snapshot = await query.get();
+
+    if (snapshot.empty) {
       content.innerHTML = `
         <div class="card">
           <h2>No Orders Found</h2>
@@ -84,15 +84,20 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    content.innerHTML = res.orders.map(o => `
-      <div class="card">
-        ${profile.role !== "customer" ? `<p><strong>User:</strong> ${o.email}</p>` : ""}
-        <p><strong>Status:</strong> ${o.status}</p>
-        <p><strong>Bottles:</strong> ${o.bottles}</p>
-        <p><strong>Total:</strong> ₹${o.total}</p>
-        <p>${new Date(o.createdAt).toLocaleString()}</p>
-      </div>
-    `).join("");
+    let html = "";
+
+    snapshot.forEach(doc => {
+      const o = doc.data();
+      html += `
+        <div class="card">
+          <p><strong>Status:</strong> ${o.status}</p>
+          <p><strong>Bottles:</strong> ${o.bottles}</p>
+          <p><strong>Total:</strong> ₹${o.total}</p>
+        </div>
+      `;
+    });
+
+    content.innerHTML = html;
 
   });
 
