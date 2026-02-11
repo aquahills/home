@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   firebase.auth().onAuthStateChanged(async (user) => {
 
-    // Correct condition
     if (!user) {
       window.location.href = "login.html";
       return;
@@ -15,15 +14,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       const settings = await api("getSettings");
-
       if (!settings.error && settings.price) {
         price = Number(settings.price);
       }
     } catch (e) {
-      console.error("Price fetch failed. Using fallback 75.");
+      console.log("Using fallback price 75");
     }
 
     updateTotal();
+
     qtyInput.addEventListener("input", updateTotal);
 
     function updateTotal() {
@@ -57,7 +56,7 @@ async function confirmOrder() {
     window.location.href = "orders.html";
 
   } catch (err) {
-    console.error("Order failed:", err);
+    console.error(err);
     alert("Order failed. Try again.");
   }
 }
