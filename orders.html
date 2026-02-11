@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>Orders</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="css/style.css">
 
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -9,27 +10,50 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
   <style>
-    table {
-      width: 100%;
-      max-width: 900px;
-      border-collapse: collapse;
-      color: white;
+    .orders-wrapper{
+      width:100%;
+      max-width:1000px;
     }
 
-    th, td {
-      padding: 12px;
-      border-bottom: 1px solid rgba(255,255,255,0.2);
-      text-align: left;
+    .table-container{
+      width:100%;
+      overflow-x:auto;
     }
 
-    a {
-      color: #00e1ff;
-      cursor: pointer;
-      text-decoration: underline;
+    table{
+      width:100%;
+      border-collapse:collapse;
+      color:white;
+      min-width:600px;
     }
 
-    a:hover {
-      opacity: 0.8;
+    th,td{
+      padding:12px;
+      border-bottom:1px solid rgba(255,255,255,0.2);
+      text-align:center;
+    }
+
+    a{
+      color:#00e1ff;
+      cursor:pointer;
+      text-decoration:underline;
+    }
+
+    @media(max-width:768px){
+      header{
+        flex-direction:column;
+        gap:15px;
+      }
+
+      nav{
+        flex-direction:column;
+        width:100%;
+      }
+
+      nav button{
+        width:100%;
+        max-width:260px;
+      }
     }
   </style>
 </head>
@@ -107,11 +131,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (snapshot.empty) {
         content.innerHTML = `
           <div class="card" style="text-align:center;">
-            <h2 style="margin-bottom:10px;">No Orders Yet</h2>
-            <p style="margin-bottom:20px; opacity:0.8;">
-              You haven’t placed any orders yet.
-            </p>
-            <button class="primary-btn" onclick="window.location.href='order.html'">
+            <h2>No Orders Yet</h2>
+            <button class="primary-btn" style="margin-top:20px;" onclick="window.location.href='order.html'">
               Order Now
             </button>
           </div>
@@ -119,23 +140,18 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // If only one order → show card directly
       if (snapshot.size === 1) {
         const doc = snapshot.docs[0];
         showSingleOrder(doc.id, doc.data());
         return;
       }
 
-      // If multiple orders → show summary table
       let rows = "";
-
       snapshot.forEach(doc => {
         const o = doc.data();
         rows += `
           <tr>
-            <td>
-              <a onclick="loadSingleOrder('${doc.id}')">${doc.id}</a>
-            </td>
+            <td><a onclick="loadSingleOrder('${doc.id}')">${doc.id}</a></td>
             <td>${o.status}</td>
             <td>${o.bottles}</td>
             <td>₹${o.total}</td>
@@ -144,26 +160,27 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       content.innerHTML = `
-        <div class="card" style="width:100%; max-width:1000px;">
+        <div class="card orders-wrapper">
           <h2 style="margin-bottom:20px;">Your Orders</h2>
-          <table>
-            <tr>
-              <th>Order ID</th>
-              <th>Status</th>
-              <th>Bottles</th>
-              <th>Total</th>
-            </tr>
-            ${rows}
-          </table>
+          <div class="table-container">
+            <table>
+              <tr>
+                <th>Order ID</th>
+                <th>Status</th>
+                <th>Bottles</th>
+                <th>Total</th>
+              </tr>
+              ${rows}
+            </table>
+          </div>
         </div>
       `;
 
     } catch (error) {
 
       content.innerHTML = `
-        <div class="card" style="text-align:center;">
+        <div class="card">
           <h2>Unable to load orders</h2>
-          <p>Please refresh the page.</p>
         </div>
       `;
     }
@@ -172,23 +189,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-
 async function loadSingleOrder(orderId) {
-
   const doc = await db.collection("orders").doc(orderId).get();
-
   if (!doc.exists) return;
-
   showSingleOrder(orderId, doc.data());
 }
 
-
 function showSingleOrder(orderId, data) {
-
   const content = document.getElementById("contentArea");
 
   content.innerHTML = `
-    <div class="card">
+    <div class="card" style="max-width:420px;">
       <h2 style="margin-bottom:15px;">Order Details</h2>
       <p><strong>Order ID:</strong> ${orderId}</p>
       <p><strong>Status:</strong> ${data.status}</p>
