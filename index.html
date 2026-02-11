@@ -69,6 +69,32 @@
 </footer>
 
 <script src="js/firebase.js"></script>
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const loginBtn = document.getElementById("loginNavBtn");
+
+  firebase.auth().onAuthStateChanged((user) => {
+
+    if (user) {
+      loginBtn.textContent = "Logout";
+      loginBtn.onclick = () => {
+        firebase.auth().signOut().then(() => {
+          window.location.reload();
+        });
+      };
+    } else {
+      loginBtn.textContent = "Login";
+      loginBtn.onclick = () => {
+        window.location.href = "login.html";
+      };
+    }
+
+  });
+
+});
+</script>
+
 <script src="js/auth.js"></script>
 
 </body>
