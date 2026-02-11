@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Aquahills Beverages</title>
 <link rel="stylesheet" href="css/style.css">
 
@@ -10,34 +11,120 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <style>
-.dashboard-card{
-background:rgba(255,255,255,.15);
-backdrop-filter:blur(15px);
-padding:30px;
-border-radius:20px;
-box-shadow:0 10px 30px rgba(0,0,0,.3);
-width:100%;
-max-width:1000px;
-margin:auto
+
+/* Larger Logo */
+.logo{
+height:110px;
 }
-table{
-width:100%;
-border-collapse:collapse;
-color:white
+
+/* Responsive logo */
+@media(max-width:768px){
+.logo{
+height:85px;
 }
-th,td{
+}
+
+/* Improved Hero */
+.hero{
+padding:80px 20px 50px;
+}
+
+.hero h1{
+font-size:42px;
+max-width:800px;
+margin:auto;
+line-height:1.3;
+}
+
+@media(max-width:768px){
+.hero h1{
+font-size:26px;
+}
+}
+
+/* Professional Footer */
+.footer{
+background:rgba(0,0,0,.5);
+padding:50px 20px 25px;
+}
+
+.footer-container{
+display:flex;
+justify-content:center;
+gap:60px;
+flex-wrap:wrap;
+text-align:center;
+}
+
+.footer-container div{
+min-width:220px;
+}
+
+.footer h3{
+font-size:20px;
+margin-bottom:10px;
+}
+
+.footer h4{
+font-size:16px;
+margin-bottom:10px;
+opacity:.9;
+}
+
+.footer p{
+font-size:14px;
+opacity:.8;
+}
+
+.certifications{
+margin-top:15px;
 padding:12px;
-border-bottom:1px solid rgba(255,255,255,.2);
-text-align:left
+background:rgba(255,255,255,.1);
+border-radius:12px;
+font-weight:600;
 }
-.success-btn{
-background:#00b4ff;
-color:white;
-padding:8px 18px;
-border:none;
-border-radius:25px;
-cursor:pointer
+
+.footer-bottom{
+margin-top:30px;
+text-align:center;
+opacity:.6;
+font-size:13px;
 }
+
+/* Extra Mobile Optimisation */
+@media(max-width:480px){
+
+nav{
+flex-direction:column;
+gap:10px;
+}
+
+.hero{
+padding:60px 15px 40px;
+}
+
+.primary-btn{
+width:100%;
+max-width:280px;
+}
+
+.carousel{
+flex-direction:column;
+align-items:center;
+}
+
+.card{
+width:100%;
+max-width:340px;
+}
+
+.footer-container{
+flex-direction:column;
+gap:25px;
+}
+
+}
+
 </style>
 </head>
 
@@ -84,21 +171,34 @@ Order Now
 
 <footer class="footer">
 <div class="footer-container">
+
 <div>
 <h3>Aquahills Beverages</h3>
 <p>Pure & Safe Drinking Water</p>
+
+<div class="certifications">
+ISI Certified <br>
+BIS Certified
 </div>
+</div>
+
 <div>
 <h4>Contact</h4>
 <p>Phone: +91 9876543210</p>
 <p>Email: support@aquahills.com</p>
 </div>
+
 <div>
 <h4>Location</h4>
 <p>Ghaziabad, Uttar Pradesh</p>
 </div>
+
 </div>
-<p class="footer-bottom">© 2026 Aquahills Beverages</p>
+
+<p class="footer-bottom">
+© 2026 Aquahills Beverages | All Rights Reserved
+</p>
+
 </footer>
 
 <script src="js/firebase.js"></script>
@@ -234,7 +334,7 @@ document.querySelector(".carousel-container").style.display="none"
 
 document.getElementById("mainContent").innerHTML=`
 <div class="dashboard-card">
-<h2 style="margin-bottom:20px;">${title}</h2>
+<h2 style="margin-bottom:20px;text-align:center;">${title}</h2>
 <table>
 <tr>
 <th>Name</th>
