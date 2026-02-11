@@ -1,7 +1,6 @@
 :root {
   --primary: #0a5fd8;
   --deep: #062c5c;
-  --light: #e6f3ff;
   --accent: #00b4ff;
 }
 
@@ -9,40 +8,47 @@
   box-sizing: border-box;
 }
 
-body {
+html, body {
   margin: 0;
+  padding: 0;
   font-family: "Segoe UI", sans-serif;
   background: linear-gradient(180deg, #062c5c 0%, #0a5fd8 60%, #00b4ff 100%);
   color: white;
   min-height: 100vh;
-  overflow-x: hidden;
 }
 
-/* Subtle water overlay */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08), transparent 40%),
-              radial-gradient(circle at 80% 70%, rgba(255,255,255,0.08), transparent 40%);
-  z-index: -1;
+/* ===== LAYOUT STRUCTURE ===== */
+
+body {
+  display: flex;
+  flex-direction: column;
 }
 
-/* HEADER */
+main {
+  flex: 1;
+}
+
+/* ===== HEADER ===== */
+
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 25px 60px;
+  padding: 20px 40px;
 }
 
 .logo {
-  height: 90px;   /* bigger logo */
+  height: 80px;
+}
+
+nav {
+  display: flex;
+  gap: 12px;
 }
 
 nav button {
-  padding: 10px 22px;
-  border-radius: 30px;
+  padding: 8px 18px;
+  border-radius: 25px;
   border: 1px solid white;
   background: transparent;
   color: white;
@@ -56,75 +62,20 @@ nav button:hover {
   color: var(--primary);
 }
 
-/* HERO */
+/* ===== HERO ===== */
+
 .hero {
   text-align: center;
-  padding: 60px 20px;
+  padding: 60px 20px 40px;
 }
 
 .hero h1 {
-  font-size: 42px;
-  margin-bottom: 30px;
-}
-
-.primary-btn {
-  padding: 16px 45px;
-  border-radius: 40px;
-  border: none;
-  background: white;
-  color: var(--primary);
-  font-weight: bold;
-  cursor: pointer;
-  font-size: 18px;
-  transition: 0.3s ease;
-}
-
-.primary-btn:hover {
-  transform: scale(1.08);
-}
-
-/* CARDS */
-.carousel-container {
-  padding: 60px 40px 100px;
-  display: flex;
-  justify-content: center;
-}
-
-.carousel {
-  display: flex;
-  gap: 40px;
-}
-
-.card {
-  background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(15px);
-  padding: 30px;
-  border-radius: 25px;
-  width: 300px;
-  box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-  transition: 0.3s ease;
-}
-
-.card:hover {
-  transform: translateY(-12px);
-}
-
-/* CENTER PAGES (LOGIN FIX) */
-.center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  text-align: center;
-}
-
-.center h2 {
+  font-size: 36px;
   margin-bottom: 25px;
 }
 
-.center button {
-  padding: 14px 40px;
+.primary-btn {
+  padding: 14px 35px;
   border-radius: 35px;
   border: none;
   background: white;
@@ -135,25 +86,136 @@ nav button:hover {
   transition: 0.3s ease;
 }
 
-.center button:hover {
-  transform: scale(1.08);
+.primary-btn:hover {
+  transform: scale(1.05);
 }
 
-/* FOOTER */
+/* ===== CAROUSEL ===== */
+
+.carousel-container {
+  padding: 40px 20px 80px;
+  display: flex;
+  justify-content: center;
+}
+
+.carousel {
+  display: flex;
+  gap: 30px;
+}
+
+.card {
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(15px);
+  padding: 25px;
+  border-radius: 20px;
+  width: 280px;
+  box-shadow: 0 10px 35px rgba(0,0,0,0.3);
+  transition: 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-10px);
+}
+
+.card h2 {
+  margin-top: 0;
+  font-size: 18px;
+}
+
+.card p {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ===== FOOTER ===== */
+
 .footer {
-  background: rgba(0,0,0,0.4);
-  padding: 50px 60px 20px;
+  background: rgba(0,0,0,0.35);
+  padding: 40px 30px 20px;
+  margin-top: auto; /* keeps footer at bottom */
 }
 
 .footer-container {
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
+  gap: 20px;
+}
+
+.footer h3,
+.footer h4 {
+  margin-bottom: 10px;
+}
+
+.footer p {
+  margin: 4px 0;
+  font-size: 14px;
 }
 
 .footer-bottom {
   text-align: center;
-  margin-top: 30px;
+  margin-top: 25px;
   opacity: 0.7;
-  font-size: 14px;
+  font-size: 13px;
+}
+
+/* ===== LOGIN PAGE CENTERING ===== */
+
+.center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  text-align: center;
+  padding: 20px;
+}
+
+.center button {
+  padding: 12px 30px;
+  border-radius: 30px;
+  border: none;
+  background: white;
+  color: var(--primary);
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* ===== RESPONSIVE FIX ===== */
+
+@media (max-width: 768px) {
+
+  header {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .logo {
+    height: 70px;
+  }
+
+  nav {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .hero h1 {
+    font-size: 24px;
+  }
+
+  /* IMPORTANT: Carousel vertical on mobile */
+  .carousel {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 350px;
+  }
+
+  .footer-container {
+    flex-direction: column;
+    text-align: center;
+  }
 }
