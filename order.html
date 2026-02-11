@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Your Orders</title>
+  <title>Place Order</title>
   <link rel="stylesheet" href="css/style.css">
 
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
 </head>
 
 <body>
@@ -15,12 +14,28 @@
 <header>
   <img src="assets/logo.png" class="logo" />
   <nav>
-    <button onclick="window.location.href='order.html'">Order Now</button>
+    <button onclick="window.location.href='orders.html'">My Orders</button>
     <button onclick="window.location.href='index.html'">Home</button>
   </nav>
 </header>
 
-<main class="center" id="contentArea"></main>
+<main class="center">
+
+  <div class="card">
+    <h2>Place Your Order</h2>
+
+    <div style="margin:20px 0;">
+      <button onclick="changeQty(-1)">-</button>
+      <input id="qty" type="number" value="1" min="1" style="width:60px; text-align:center;">
+      <button onclick="changeQty(1)">+</button>
+    </div>
+
+    <p><strong>Total: ₹<span id="total">0</span></strong></p>
+
+    <button class="primary-btn" onclick="confirmOrder()">Confirm Order</button>
+  </div>
+
+</main>
 
 <footer class="footer">
   <div class="footer-container">
@@ -44,67 +59,97 @@
 <script src="js/firebase.js"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+let currentPrice = 75;
 
-  const content = document.getElementById("contentArea");
+document.addEventListener("DOMContentLoaded", () => {
 
   firebase.auth().onAuthStateChanged(async (user) => {
 
     if (!user) {
-      content.innerHTML = `
-        <div class="card">
-          <h2>You are not logged in</h2>
-          <button onclick="window.location.href='login.html'" class="primary-btn">
-            Login
-          </button>
-        </div>
-      `;
+      window.location.href = "login.html";
       return;
     }
 
-    try {
-
-      const res = await api("getOrders");
-
-      if (!res || res.error) {
-        showEmptyState();
-        return;
-      }
-
-      const orders = Array.isArray(res.orders) ? res.orders : [];
-
-      if (orders.length === 0) {
-        showEmptyState();
-        return;
-      }
-
-      content.innerHTML = orders.map(o => `
-        <div class="card">
-          <p><strong>Status:</strong> ${o.status}</p>
-          <p><strong>Bottles:</strong> ${o.bottles}</p>
-          <p><strong>Total:</strong> ₹${o.total}</p>
-          <p>${new Date(o.createdAt).toLocaleString()}</p>
-        </div>
-      `).join("");
-
-    } catch (e) {
-      showEmptyState();
+    const settingsDoc = await db.collection("settings").doc("global").get();
+    if (settingsDoc.exists) {
+      currentPrice = settingsDoc.data().price || 75;
     }
+
+    updateTotal();
 
   });
 
-  function showEmptyState() {
-    content.innerHTML = `
-      <div class="card">
-        <h2>You have not placed any orders</h2>
-        <button onclick="window.location.href='order.html'" class="primary-btn">
-          Order Now
-        </button>
-      </div>
-    `;
+});
+
+function changeQty(change) {
+  const qtyInput = document.getElementById("qty");
+  let qty = Number(qtyInput.value || 1);
+  qty += change;
+  if (qty < 1) qty = 1;
+  qtyInput.value = qty;
+  updateTotal();
+}
+
+function updateTotal() {
+  const qty = Number(document.getElementById("qty").value || 1);
+  document.getElementById("total").innerText = qty * currentPrice;
+}
+
+async function confirmOrder() {
+
+  const user = firebase.auth().currentUser;
+  if (!user) {
+    window.location.href = "login.html";
+    return;
   }
 
-});
+  const qty = Number(document.getElementById("qty").value);
+
+  const userDoc = await db.collection("users").doc(user.uid).get();
+  const userData = userDoc.data();
+
+  // Profile validation
+  if (!userData.phone ||
+      !userData.address.house ||
+      !userData.address.city ||
+      !userData.address.pincode) {
+
+    alert("Almost done. Please complete your delivery details so we can process your order.");
+    window.location.href = "address.html";
+    return;
+  }
+
+  const settingsRef = db.collection("settings").doc("global");
+  const settingsDoc = await settingsRef.get();
+  const settings = settingsDoc.data();
+
+  let assignedTo = null;
+
+  if (settings.autoAssign && settings.deliveryAgents.length > 0) {
+
+    const index = settings.lastAssignedIndex || 0;
+    assignedTo = settings.deliveryAgents[index];
+
+    const nextIndex = (index + 1) % settings.deliveryAgents.length;
+
+    await settingsRef.update({
+      lastAssignedIndex: nextIndex
+    });
+  }
+
+  await db.collection("orders").add({
+    customerId: user.uid,
+    customerEmail: user.email,
+    bottles: qty,
+    total: qty * settings.price,
+    status: "Pending",
+    assignedTo: assignedTo,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  alert("Order placed successfully.");
+  window.location.href = "orders.html";
+}
 </script>
 
 </body>
