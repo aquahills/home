@@ -68,7 +68,7 @@ padding:40px 20px
 
 .wrapper{
 width:100%;
-max-width:1100px
+max-width:1200px
 }
 
 .admin-card{
@@ -80,25 +80,6 @@ box-shadow:0 10px 30px rgba(0,0,0,.3)
 }
 
 h2{text-align:center;margin-bottom:25px}
-
-.dashboard-grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-gap:25px
-}
-
-.stat{
-background:rgba(255,255,255,.2);
-padding:35px;
-border-radius:18px;
-text-align:center;
-cursor:pointer;
-transition:.3s
-}
-
-.stat:hover{transform:translateY(-5px)}
-
-.stat h2{margin:0;font-size:34px}
 
 .controls{
 display:flex;
@@ -121,7 +102,7 @@ text-align:center
 }
 
 th,td{
-padding:14px;
+padding:12px;
 border-bottom:1px solid rgba(255,255,255,.2);
 text-align:center
 }
@@ -129,40 +110,58 @@ text-align:center
 .action-group{
 display:flex;
 justify-content:center;
-gap:10px
+gap:8px
 }
 
 .theme-btn{
-padding:8px 18px;
+padding:6px 14px;
 border-radius:25px;
 border:none;
 background:white;
 color:#0a5fd8;
 font-weight:600;
-cursor:pointer;
-transition:.3s
+cursor:pointer
 }
 
-.theme-btn:hover{transform:scale(1.05)}
+.danger-btn{background:#ff4d4d;color:white}
+.success-btn{background:#00b4ff;color:white}
 
-.danger-btn{
-background:#ff4d4d;
-color:white
+.edit-input{
+width:100%;
+border-radius:10px;
+border:none;
+padding:6px;
+text-align:center
 }
 
-.success-btn{
-background:#00b4ff;
-color:white
+.modal{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.5);
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:2000;
+display:none
 }
 
-.center-btn{
+.modal-content{
+background:#062c5c;
+padding:30px;
+border-radius:20px;
+text-align:center;
+width:90%;
+max-width:400px
+}
+
+.modal-buttons{
 display:flex;
 justify-content:center;
-margin-top:25px
-}
-
-@media(max-width:768px){
-.content{padding:20px 15px}
+gap:15px;
+margin-top:20px
 }
 </style>
 </head>
@@ -176,7 +175,6 @@ margin-top:25px
 
 <div class="sidebar" id="sidebar">
 <button onclick="navigate('dashboard')">Dashboard</button>
-<button onclick="navigate('ordersSummary')">Orders</button>
 <button onclick="navigate('users')">Users</button>
 <button onclick="navigate('settings')">Settings</button>
 <button onclick="logout()">Logout</button>
@@ -188,48 +186,41 @@ margin-top:25px
 <div class="wrapper" id="contentArea"></div>
 </div>
 
+<!-- Delete Modal -->
+<div class="modal" id="deleteModal">
+  <div class="modal-content">
+    <h3>Delete this user?</h3>
+    <div class="modal-buttons">
+      <button class="theme-btn danger-btn" onclick="confirmDelete()">Delete</button>
+      <button class="theme-btn" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <script src="js/firebase.js"></script>
 
 <script>
+let deleteUserId=null
+
 function toggleSidebar(){sidebar.classList.toggle("active");overlay.classList.toggle("active")}
 function closeSidebar(){sidebar.classList.remove("active");overlay.classList.remove("active")}
-function navigate(s){closeSidebar();showSection(s)}
+function navigate(s){closeSidebar();if(s==="users")loadUsers();if(s==="settings")loadSettings();if(s==="dashboard")loadDashboard()}
 
 firebase.auth().onAuthStateChanged(async user=>{
 if(!user)return location.href="login.html"
 const doc=await db.collection("users").doc(user.uid).get()
 if(doc.data()?.role!=="admin")return location.href="index.html"
-showSection("dashboard")
+loadDashboard()
 })
 
 function logout(){firebase.auth().signOut().then(()=>location.href="index.html")}
 
-function showSection(s){
-if(s==="dashboard")loadDashboard()
-if(s==="users")loadUsers()
-if(s==="activeOrders")loadActiveOrders()
-if(s==="ordersSummary")loadOrdersSummary()
-if(s==="settings")loadSettings()
-}
-
-/* DASHBOARD */
 async function loadDashboard(){
-const orders=await db.collection("orders").get()
 const users=await db.collection("users").get()
-const active=orders.docs.filter(d=>d.data().status!=="Delivered")
-
 contentArea.innerHTML=`
 <div class="admin-card">
-<div class="dashboard-grid">
-<div class="stat" onclick="navigate('users')">
-<h2>👥 ${users.size}</h2>
-<p>All Users</p>
-</div>
-<div class="stat" onclick="navigate('activeOrders')">
-<h2>📦 ${active.length}</h2>
-<p>Active Orders</p>
-</div>
-</div>
+<h2>Dashboard</h2>
+<p>Total Users: ${users.size}</p>
 </div>`
 }
 
@@ -241,14 +232,15 @@ let rows=""
 snap.forEach(doc=>{
 const u=doc.data()
 rows+=`
-<tr>
+<tr data-id="${doc.id}">
 <td>${u.name||""}</td>
 <td>${u.phone||""}</td>
+<td>${u.email||""}</td>
 <td>${u.role}</td>
 <td>
 <div class="action-group">
-<button class="theme-btn" onclick="editUser('${doc.id}')">Edit</button>
-<button class="theme-btn danger-btn" onclick="deleteUser('${doc.id}')">Delete</button>
+<button class="theme-btn" onclick="enableEdit('${doc.id}')">Edit</button>
+<button class="theme-btn danger-btn" onclick="openDelete('${doc.id}')">Delete</button>
 </div>
 </td>
 </tr>`
@@ -259,6 +251,7 @@ contentArea.innerHTML=`
 <h2>All Users</h2>
 
 <div class="controls">
+<input type="text" id="searchInput" placeholder="Search..." onkeyup="searchUsers()">
 <select id="roleFilter" onchange="filterUsers()">
 <option value="">All Roles</option>
 <option value="admin">Admin</option>
@@ -271,6 +264,7 @@ contentArea.innerHTML=`
 <tr>
 <th>Name</th>
 <th>Phone</th>
+<th>Email</th>
 <th>Role</th>
 <th>Action</th>
 </tr>
@@ -279,156 +273,87 @@ ${rows}
 </div>`
 }
 
-function filterUsers(){
-const value=document.getElementById("roleFilter").value
-const rows=document.querySelectorAll("#usersTable tr")
-rows.forEach((row,i)=>{
+function searchUsers(){
+const val=document.getElementById("searchInput").value.toLowerCase()
+document.querySelectorAll("#usersTable tr").forEach((row,i)=>{
 if(i===0)return
-const role=row.children[2].innerText
-row.style.display=value===""||role===value?"":"none"
+row.style.display=row.innerText.toLowerCase().includes(val)?"":"none"
 })
 }
 
-function editUser(id){
-const role=prompt("Enter role: admin / customer / delivery")
-if(!role)return
-db.collection("users").doc(id).update({role})
-loadUsers()
+function filterUsers(){
+const role=document.getElementById("roleFilter").value
+document.querySelectorAll("#usersTable tr").forEach((row,i)=>{
+if(i===0)return
+const r=row.children[3].innerText
+row.style.display=(role===""||r===role)?"":"none"
+})
 }
 
-function deleteUser(id){
-if(confirm("Delete user?")){
-db.collection("users").doc(id).delete()
-loadUsers()
-}
-}
+function enableEdit(id){
+const row=document.querySelector(`tr[data-id='${id}']`)
+const cells=row.children
+const name=cells[0].innerText
+const phone=cells[1].innerText
+const email=cells[2].innerText
+const role=cells[3].innerText
 
-/* ACTIVE ORDERS */
-async function loadActiveOrders(){
-const snap=await db.collection("orders").where("status","!=","Delivered").get()
-
-let rows=""
-for(const doc of snap.docs){
-const o=doc.data()
-const uDoc=await db.collection("users").doc(o.customerId).get()
-const u=uDoc.data()||{}
-rows+=`
-<tr>
-<td>${u.name||""}</td>
-<td>${u.phone||""}</td>
-<td>${o.bottles}</td>
-<td>₹${o.total}</td>
+row.innerHTML=`
+<td><input class="edit-input" value="${name}" id="name_${id}"></td>
+<td><input class="edit-input" value="${phone}" id="phone_${id}"></td>
+<td><input class="edit-input" value="${email}" id="email_${id}"></td>
 <td>
-<button class="theme-btn success-btn" onclick="markDelivered('${doc.id}')">Mark Delivered</button>
+<select id="role_${id}" class="edit-input">
+<option ${role==="admin"?"selected":""}>admin</option>
+<option ${role==="customer"?"selected":""}>customer</option>
+<option ${role==="delivery"?"selected":""}>delivery</option>
+</select>
 </td>
-</tr>`
-}
-
-contentArea.innerHTML=`
-<div class="admin-card">
-<h2>Active Orders</h2>
-<table>
-<tr>
-<th>Name</th>
-<th>Phone</th>
-<th>Bottles</th>
-<th>Total</th>
-<th>Action</th>
-</tr>
-${rows}
-</table>
-</div>`
-}
-
-async function markDelivered(id){
-await db.collection("orders").doc(id).update({status:"Delivered"})
-loadActiveOrders()
-}
-
-/* ORDERS SUMMARY */
-async function loadOrdersSummary(){
-const orders=await db.collection("orders").get()
-const users=await db.collection("users").get()
-
-const map={}
-orders.forEach(o=>{
-const d=o.data()
-if(!map[d.customerId])map[d.customerId]=[]
-map[d.customerId].push(d)
-})
-
-let rows=""
-users.forEach(u=>{
-const userOrders=map[u.id]||[]
-if(userOrders.length===0)return
-const last=userOrders.sort((a,b)=>b.createdAt?.seconds-a.createdAt?.seconds)[0]
-rows+=`
-<tr>
-<td>${u.data().name||""}</td>
-<td>${userOrders.length}</td>
-<td>${last?.createdAt?.toDate().toLocaleDateString()||""}</td>
 <td>
-<button class="theme-btn" onclick="showUserOrders('${u.id}')">Show All Orders</button>
-</td>
-</tr>`
-})
-
-contentArea.innerHTML=`
-<div class="admin-card">
-<h2>Orders Summary</h2>
-<table>
-<tr>
-<th>Name</th>
-<th>Orders Placed</th>
-<th>Last Order</th>
-<th>Action</th>
-</tr>
-${rows}
-</table>
-</div>`
-}
-
-async function showUserOrders(id){
-const snap=await db.collection("orders").where("customerId","==",id).get()
-let rows=""
-snap.forEach(doc=>{
-const o=doc.data()
-rows+=`
-<tr>
-<td>${o.bottles}</td>
-<td>₹${o.total}</td>
-<td>${o.status}</td>
-</tr>`
-})
-contentArea.innerHTML=`
-<div class="admin-card">
-<h2>User Orders</h2>
-<table>
-<tr>
-<th>Bottles</th>
-<th>Total</th>
-<th>Status</th>
-</tr>
-${rows}
-</table>
-<div class="center-btn">
-<button class="theme-btn" onclick="navigate('ordersSummary')">Back</button>
+<div class="action-group">
+<button class="theme-btn success-btn" onclick="saveUser('${id}')">Save</button>
+<button class="theme-btn" onclick="loadUsers()">Cancel</button>
 </div>
-</div>`
+</td>`
+}
+
+async function saveUser(id){
+await db.collection("users").doc(id).update({
+name:document.getElementById(`name_${id}`).value,
+phone:document.getElementById(`phone_${id}`).value,
+email:document.getElementById(`email_${id}`).value,
+role:document.getElementById(`role_${id}`).value
+})
+loadUsers()
+}
+
+/* DELETE */
+function openDelete(id){
+deleteUserId=id
+document.getElementById("deleteModal").style.display="flex"
+}
+
+function closeModal(){
+document.getElementById("deleteModal").style.display="none"
+deleteUserId=null
+}
+
+async function confirmDelete(){
+if(!deleteUserId)return
+await db.collection("users").doc(deleteUserId).delete()
+closeModal()
+loadUsers()
 }
 
 /* SETTINGS */
 async function loadSettings(){
 const doc=await db.collection("settings").doc("global").get()
 const price=doc.data()?.price||75
-
 contentArea.innerHTML=`
 <div class="admin-card">
 <h2>Settings</h2>
-<div class="controls">
 <input type="number" id="priceInput" value="${price}">
 <button class="theme-btn" onclick="savePrice()">Save</button>
-</div>
 </div>`
 }
 
