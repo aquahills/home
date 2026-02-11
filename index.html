@@ -167,6 +167,20 @@ align-items:center;
 }
 
 }
+/* === FORCE NAV BUTTONS MATCH MAIN BUTTON ON MOBILE === */
+@media(max-width:768px){
+  nav{
+    flex-direction:column !important;
+    align-items:center !important;
+    width:100% !important;
+  }
+
+  nav button{
+    width:100% !important;
+    max-width:280px !important;
+    padding:14px 35px !important;
+  }
+}
 
 </style>
 </head>
@@ -287,11 +301,13 @@ const role=data.role ? data.role.trim().toLowerCase() : "customer"
 if(role==="admin"){
 mainActionBtn.textContent="Admin Controls"
 mainActionBtn.onclick=()=>location.href="admin.html"
+ordersBtn.style.display="none"
 ordersBtn.onclick=()=>loadActiveOrders()
 }
 else if(role==="delivery"){
 mainActionBtn.textContent="Assigned Orders"
 mainActionBtn.onclick=()=>loadAssignedOrders(user.uid)
+ordersBtn.style.display="none"
 ordersBtn.onclick=()=>loadAssignedOrders(user.uid)
 }
 else{
@@ -345,6 +361,7 @@ renderTable("Active Orders",rows)
 }
 
 async function loadAssignedOrders(uid){
+if(!uid) return;
 const snap=await db.collection("orders")
 .where("assignedTo","==",uid)
 .where("status","!=","Delivered")
