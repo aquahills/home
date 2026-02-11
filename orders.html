@@ -7,6 +7,31 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+  <style>
+    table {
+      width: 100%;
+      max-width: 900px;
+      border-collapse: collapse;
+      color: white;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      text-align: left;
+    }
+
+    a {
+      color: #00e1ff;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    a:hover {
+      opacity: 0.8;
+    }
+  </style>
 </head>
 
 <body>
@@ -84,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="card" style="text-align:center;">
             <h2 style="margin-bottom:10px;">No Orders Yet</h2>
             <p style="margin-bottom:20px; opacity:0.8;">
-              You haven’t placed any orders yet. Start your first delivery now.
+              You haven’t placed any orders yet.
             </p>
             <button class="primary-btn" onclick="window.location.href='order.html'">
               Order Now
@@ -94,28 +119,51 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      let html = "";
+      // If only one order → show card directly
+      if (snapshot.size === 1) {
+        const doc = snapshot.docs[0];
+        showSingleOrder(doc.id, doc.data());
+        return;
+      }
+
+      // If multiple orders → show summary table
+      let rows = "";
 
       snapshot.forEach(doc => {
         const o = doc.data();
-        html += `
-          <div class="card">
-            <p><strong>Status:</strong> ${o.status}</p>
-            <p><strong>Bottles:</strong> ${o.bottles}</p>
-            <p><strong>Total:</strong> ₹${o.total}</p>
-          </div>
+        rows += `
+          <tr>
+            <td>
+              <a onclick="loadSingleOrder('${doc.id}')">${doc.id}</a>
+            </td>
+            <td>${o.status}</td>
+            <td>${o.bottles}</td>
+            <td>₹${o.total}</td>
+          </tr>
         `;
       });
 
-      content.innerHTML = html;
+      content.innerHTML = `
+        <div class="card" style="width:100%; max-width:1000px;">
+          <h2 style="margin-bottom:20px;">Your Orders</h2>
+          <table>
+            <tr>
+              <th>Order ID</th>
+              <th>Status</th>
+              <th>Bottles</th>
+              <th>Total</th>
+            </tr>
+            ${rows}
+          </table>
+        </div>
+      `;
 
     } catch (error) {
-      console.error("Orders load error:", error);
 
       content.innerHTML = `
         <div class="card" style="text-align:center;">
           <h2>Unable to load orders</h2>
-          <p style="opacity:0.8;">Please refresh the page.</p>
+          <p>Please refresh the page.</p>
         </div>
       `;
     }
@@ -123,8 +171,37 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 });
-</script>
 
+
+async function loadSingleOrder(orderId) {
+
+  const doc = await db.collection("orders").doc(orderId).get();
+
+  if (!doc.exists) return;
+
+  showSingleOrder(orderId, doc.data());
+}
+
+
+function showSingleOrder(orderId, data) {
+
+  const content = document.getElementById("contentArea");
+
+  content.innerHTML = `
+    <div class="card">
+      <h2 style="margin-bottom:15px;">Order Details</h2>
+      <p><strong>Order ID:</strong> ${orderId}</p>
+      <p><strong>Status:</strong> ${data.status}</p>
+      <p><strong>Bottles:</strong> ${data.bottles}</p>
+      <p><strong>Total:</strong> ₹${data.total}</p>
+      <br>
+      <button class="primary-btn" onclick="window.location.reload()">
+        Back to Orders
+      </button>
+    </div>
+  `;
+}
+</script>
 
 </body>
 </html>
