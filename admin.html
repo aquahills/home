@@ -9,68 +9,115 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
   <style>
-    body { margin:0; display:flex; font-family:Arial; }
-    .sidebar {
-      width:220px;
-      background:#111;
-      color:white;
-      height:100vh;
-      padding:20px;
-      box-sizing:border-box;
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: linear-gradient(to bottom, #123c7c, #1e73be);
+      color: white;
+      overflow-x: hidden;
     }
-    .sidebar h2 { margin-bottom:30px; }
-    .sidebar button {
-      width:100%;
-      padding:10px;
-      margin-bottom:10px;
-      background:#222;
-      border:none;
-      color:white;
-      border-radius:8px;
-      cursor:pointer;
-    }
-    .sidebar button:hover { background:#333; }
 
+    /* ===== TOP BAR ===== */
+    .topbar {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      background: rgba(0,0,0,0.2);
+    }
+
+    .menu-btn {
+      font-size: 26px;
+      cursor: pointer;
+      margin-right: 20px;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      position: fixed;
+      left: -250px;
+      top: 0;
+      width: 250px;
+      height: 100%;
+      background: #111;
+      padding: 20px;
+      transition: 0.3s ease;
+      z-index: 1000;
+    }
+
+    .sidebar.active {
+      left: 0;
+    }
+
+    .sidebar h2 {
+      margin-bottom: 30px;
+    }
+
+    .sidebar button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #222;
+      color: white;
+      cursor: pointer;
+    }
+
+    .sidebar button:hover {
+      background: #333;
+    }
+
+    /* ===== CONTENT ===== */
     .content {
-      flex:1;
-      padding:30px;
-      background:#f4f4f4;
-      overflow:auto;
+      padding: 30px;
     }
 
     .card {
-      background:white;
-      padding:20px;
-      border-radius:12px;
-      margin-bottom:20px;
-      box-shadow:0 2px 6px rgba(0,0,0,0.1);
+      background: rgba(255,255,255,0.1);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(8px);
     }
 
     table {
-      width:100%;
-      border-collapse:collapse;
+      width: 100%;
+      border-collapse: collapse;
+      color: white;
     }
 
     th, td {
-      padding:10px;
-      border-bottom:1px solid #ddd;
-      text-align:left;
+      padding: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
     }
 
     .primary-btn {
-      padding:8px 12px;
-      border:none;
-      background:#007bff;
-      color:white;
-      border-radius:6px;
-      cursor:pointer;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 6px;
+      background: #0d6efd;
+      color: white;
+      cursor: pointer;
+    }
+
+    input {
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+      margin-top: 8px;
     }
   </style>
 </head>
 
 <body>
 
-<div class="sidebar">
+<div class="topbar">
+  <div class="menu-btn" onclick="toggleSidebar()">☰</div>
+  <h3>Admin Panel</h3>
+</div>
+
+<div class="sidebar" id="sidebar">
   <h2>Admin</h2>
   <button onclick="showSection('dashboard')">Dashboard</button>
   <button onclick="showSection('orders')">Orders</button>
@@ -86,7 +133,10 @@
 <script src="js/firebase.js"></script>
 
 <script>
-let currentUser;
+
+function toggleSidebar() {
+  document.getElementById("sidebar").classList.toggle("active");
+}
 
 firebase.auth().onAuthStateChanged(async (user) => {
 
@@ -103,10 +153,8 @@ firebase.auth().onAuthStateChanged(async (user) => {
     return;
   }
 
-  currentUser = user;
-  showSection('dashboard');
+  showSection("dashboard");
 });
-
 
 function logout() {
   firebase.auth().signOut().then(() => {
@@ -114,36 +162,31 @@ function logout() {
   });
 }
 
-
 function showSection(section) {
-  if (section === 'dashboard') loadDashboard();
-  if (section === 'orders') loadOrders();
-  if (section === 'users') loadUsers();
-  if (section === 'settings') loadSettings();
+  if (section === "dashboard") loadDashboard();
+  if (section === "orders") loadOrders();
+  if (section === "users") loadUsers();
+  if (section === "settings") loadSettings();
 }
 
-
-/* ================= DASHBOARD ================= */
+/* ===== DASHBOARD ===== */
 
 async function loadDashboard() {
-
-  const ordersSnapshot = await db.collection("orders").get();
-  const usersSnapshot = await db.collection("users").get();
+  const orders = await db.collection("orders").get();
+  const users = await db.collection("users").get();
 
   document.getElementById("contentArea").innerHTML = `
     <div class="card">
       <h2>Dashboard</h2>
-      <p>Total Orders: ${ordersSnapshot.size}</p>
-      <p>Total Users: ${usersSnapshot.size}</p>
+      <p>Total Orders: ${orders.size}</p>
+      <p>Total Users: ${users.size}</p>
     </div>
   `;
 }
 
-
-/* ================= ORDERS ================= */
+/* ===== ORDERS ===== */
 
 async function loadOrders() {
-
   const snapshot = await db.collection("orders")
     .orderBy("createdAt", "desc")
     .get();
@@ -158,25 +201,19 @@ async function loadOrders() {
         <td>${o.customerEmail}</td>
         <td>${o.bottles}</td>
         <td>${o.status}</td>
-        <td>
-          <button class="primary-btn" onclick="markDelivered('${doc.id}')">
-            Mark Delivered
-          </button>
-        </td>
       </tr>
     `;
   });
 
   document.getElementById("contentArea").innerHTML = `
     <div class="card">
-      <h2>All Orders</h2>
+      <h2>Orders</h2>
       <table>
         <tr>
           <th>ID</th>
           <th>Email</th>
           <th>Bottles</th>
           <th>Status</th>
-          <th>Action</th>
         </tr>
         ${rows}
       </table>
@@ -184,51 +221,23 @@ async function loadOrders() {
   `;
 }
 
-async function markDelivered(orderId) {
-  await db.collection("orders").doc(orderId).update({
-    status: "Delivered"
-  });
-  loadOrders();
-}
-
-
-/* ================= USERS ================= */
+/* ===== USERS ===== */
 
 async function loadUsers() {
-
   const snapshot = await db.collection("users").get();
 
   let rows = "";
 
-  for (const doc of snapshot.docs) {
-
-    const data = doc.data();
-
-    const latestOrder = await db.collection("orders")
-      .where("customerId", "==", doc.id)
-      .orderBy("createdAt", "desc")
-      .limit(1)
-      .get();
-
-    let latestOrderId = "-";
-
-    if (!latestOrder.empty) {
-      latestOrderId = latestOrder.docs[0].id;
-    }
-
+  snapshot.forEach(doc => {
+    const u = doc.data();
     rows += `
       <tr>
-        <td>${data.name || "-"}</td>
-        <td>${data.phone || "-"}</td>
-        <td>${latestOrderId}</td>
-        <td>
-          <button class="primary-btn" onclick="editUser('${doc.id}')">
-            Edit
-          </button>
-        </td>
+        <td>${u.name || "-"}</td>
+        <td>${u.phone || "-"}</td>
+        <td>${u.role}</td>
       </tr>
     `;
-  }
+  });
 
   document.getElementById("contentArea").innerHTML = `
     <div class="card">
@@ -237,8 +246,7 @@ async function loadUsers() {
         <tr>
           <th>Name</th>
           <th>Phone</th>
-          <th>Latest Order</th>
-          <th>Action</th>
+          <th>Role</th>
         </tr>
         ${rows}
       </table>
@@ -246,41 +254,29 @@ async function loadUsers() {
   `;
 }
 
-function editUser(userId) {
-  window.location.href = "address.html?edit=" + userId;
-}
-
-
-/* ================= SETTINGS ================= */
+/* ===== SETTINGS ===== */
 
 async function loadSettings() {
-
   const doc = await db.collection("settings").doc("global").get();
   const data = doc.data() || {};
 
   document.getElementById("contentArea").innerHTML = `
     <div class="card">
       <h2>Settings</h2>
-      <label>Bottle Price:</label><br><br>
+      <label>Bottle Price</label><br>
       <input type="number" id="priceInput" value="${data.price || 75}">
       <br><br>
-      <button class="primary-btn" onclick="savePrice()">
-        Save
-      </button>
+      <button class="primary-btn" onclick="savePrice()">Save</button>
     </div>
   `;
 }
 
 async function savePrice() {
-
   const price = Number(document.getElementById("priceInput").value);
-
-  await db.collection("settings").doc("global").update({
-    price: price
-  });
-
-  alert("Price Updated");
+  await db.collection("settings").doc("global").update({ price });
+  alert("Price updated");
 }
+
 </script>
 
 </body>
