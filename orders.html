@@ -1,131 +1,115 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Orders</title>
+  <title>Your Orders</title>
   <link rel="stylesheet" href="css/style.css">
+
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 </head>
-<body class="center">
 
-<h2 id="pageTitle">Orders</h2>
-<div id="orders"></div>
+<body>
 
+<header>
+  <img src="assets/logo.png" class="logo" />
+  <nav>
+    <button onclick="window.location.href='index.html'">Home</button>
+  </nav>
+</header>
+
+<main class="center" id="contentArea">
+</main>
+
+<footer class="footer">
+  <div class="footer-container">
+    <div>
+      <h3>Aquahills Beverages</h3>
+      <p>Pure & Safe Drinking Water</p>
+    </div>
+    <div>
+      <h4>Contact</h4>
+      <p>Phone: +91 9876543210</p>
+      <p>Email: support@aquahills.com</p>
+    </div>
+    <div>
+      <h4>Location</h4>
+      <p>Ghaziabad, Uttar Pradesh</p>
+    </div>
+  </div>
+  <p class="footer-bottom">© 2026 Aquahills Beverages</p>
+</footer>
+
+<script src="js/firebase.js"></script>
 <script src="js/api.js"></script>
+
 <script>
-  let deliveryUsers = [];
-  const allUsersRes = await api("getAllUsers", { email });
-deliveryUsers = (allUsersRes.users || []).filter(u => u.role === "delivery");
-
-(async () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  const content = document.getElementById("contentArea");
   const email = localStorage.getItem("user");
+
   if (!email) {
-    window.location.href = "login.html";
+    content.innerHTML = `
+      <div class="card">
+        <h2>You are not logged in</h2>
+        <p>To track your orders and place new ones, please login securely.</p>
+        <button onclick="window.location.href='login.html'" class="primary-btn">
+          Login / Register
+        </button>
+      </div>
+    `;
     return;
   }
 
-  await api("markOrdersSeen", { email });
+  try {
+    const res = await api("getOrders", { email });
+    const orders = res.orders || [];
 
-  const user = await api("getUser", { email });
-  const res = await api("getOrders", { email, fast: true });
-  const orders = res.orders || [];
+    if (orders.length === 0) {
+      content.innerHTML = `
+        <div class="card">
+          <h2>No Orders Yet</h2>
+          <p>You have not placed any orders.</p>
+          <button onclick="window.location.href='order.html'" class="primary-btn">
+            Order Now
+          </button>
+        </div>
+      `;
+      return;
+    }
 
-  const container = document.getElementById("orders");
-  const title = document.getElementById("pageTitle");
+    const current = orders[0];
 
-  if (user.role === "delivery") {
-    title.innerText = "Delivery Orders";
-  }
+    let historyHTML = orders.slice(1).map(o => `
+      <li>₹${o.total} • ${o.status} • ${new Date(o.createdAt).toLocaleDateString()}</li>
+    `).join("");
 
-  if (orders.length === 0) {
-    container.innerHTML = "<p>No orders found.</p>";
-    return;
-  }
+    content.innerHTML = `
+      <div class="card">
+        <h2>Current Order</h2>
+        <p><strong>Status:</strong> ${current.status}</p>
+        <p><strong>Bottles:</strong> ${current.bottles}</p>
+        <p><strong>Total:</strong> ₹${current.total}</p>
+      </div>
 
-  orders.forEach(o => {
-    const div = document.createElement("div");
-    div.className = "card";
-
-    let html = `
-      <p><strong>Status:</strong> ${o.status}</p>
-      <p><strong>Bottles:</strong> ${o.bottles}</p>
-      <p><strong>Ordered At:</strong> ${new Date(o.createdAt).toLocaleString()}</p>
+      <div class="card">
+        <h2>Order History</h2>
+        <ul>${historyHTML}</ul>
+        <button onclick="window.location.href='order.html'" class="primary-btn">
+          Order Now
+        </button>
+      </div>
     `;
 
-    if (user.role === "customer") {
-      html += `<p><strong>Total:</strong> ₹${o.total}</p>`;
-    }
-
-    if (user.role === "delivery" && o.customer) {
-      html += `
-        <p><strong>Name:</strong> ${o.customer.name}</p>
-        <p><strong>Phone:</strong> ${o.customer.phone}</p>
-        <p><strong>Address:</strong>
-          ${o.customer.house}, ${o.customer.street},
-          ${o.customer.city} - ${o.customer.pincode}
-        </p>
-      `;
-    }
-
-    if (user.role === "admin") {
-  const options = deliveryUsers
-    .map(d => `<option value="${d.email}">${d.name}</option>`)
-    .join("");
-
-  html += `
-    <p><strong>Email:</strong> ${o.email}</p>
-    <p><strong>Total:</strong> ₹${o.total}</p>
-    <p><strong>Assigned To:</strong> ${o.assignedTo || "Unassigned"}</p>
-    <select onchange="assignOrder('${o.orderId}', this.value)">
-      <option value="">Assign delivery</option>
-      ${options}
-    </select>
-  `;
-}
-
-
-    if (user.role !== "customer" && o.status === "Pending") {
-      html += `
-        <button onclick="confirmDelivered('${o.orderId}')">
-Delivered
-</button>
-
-      `;
-    }
-
-    div.innerHTML = html;
-    container.appendChild(div);
-  });
-})();
-
-async function updateStatus(orderId, status) {
-  await api("updateOrderStatus", { orderId, status });
-  location.reload();
-}
-async function assignOrder(orderId, deliveryEmail) {
-  if (!deliveryEmail) return;
-  await api("assignOrder", {
-    adminEmail: localStorage.getItem("user"),
-    orderId,
-    deliveryEmail
-  });
-  location.reload();
-}
-async function confirmDelivered(orderId) {
-  const ok = confirm("Is this order delivered?");
-  if (!ok) return;
-
-  await api("updateOrderStatus", {
-    orderId,
-    status: "Delivered"
-  });
-
-  location.reload();
-}
-
+  } catch (e) {
+    content.innerHTML = `
+      <div class="card">
+        <h2>Error Loading Orders</h2>
+        <p>Please try again later.</p>
+      </div>
+    `;
+  }
+});
 </script>
-
 
 </body>
 </html>
