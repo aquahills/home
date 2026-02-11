@@ -260,6 +260,88 @@ contentArea.innerHTML=`
 </div>
 </div>`
 }
+/* ORDERS SUMMARY */
+async function loadOrdersSummary(){
+const orders=await db.collection("orders").get()
+const users=await db.collection("users").get()
+
+const map={}
+orders.forEach(o=>{
+const d=o.data()
+if(!map[d.customerId])map[d.customerId]=[]
+map[d.customerId].push(d)
+})
+
+let rows=""
+users.forEach(u=>{
+const userOrders=map[u.id]||[]
+if(userOrders.length===0)return
+
+const last=userOrders.sort((a,b)=>{
+if(!a.createdAt||!b.createdAt)return 0
+return b.createdAt.seconds-a.createdAt.seconds
+})[0]
+
+rows+=`
+<tr>
+<td>${u.data().name||""}</td>
+<td>${userOrders.length}</td>
+<td>${last?.createdAt?.toDate().toLocaleDateString()||""}</td>
+<td>
+<button class="theme-btn" onclick="showUserOrders('${u.id}')">
+Show All Orders
+</button>
+</td>
+</tr>`
+})
+
+contentArea.innerHTML=`
+<div class="admin-card">
+<h2>Orders Summary</h2>
+<table>
+<tr>
+<th>Name</th>
+<th>Orders Placed</th>
+<th>Last Order</th>
+<th>Action</th>
+</tr>
+${rows}
+</table>
+</div>`
+}
+
+  async function showUserOrders(id){
+const snap=await db.collection("orders").where("customerId","==",id).get()
+
+let rows=""
+snap.forEach(doc=>{
+const o=doc.data()
+rows+=`
+<tr>
+<td>${o.bottles}</td>
+<td>₹${o.total}</td>
+<td>${o.status}</td>
+</tr>`
+})
+
+contentArea.innerHTML=`
+<div class="admin-card">
+<h2>User Orders</h2>
+<table>
+<tr>
+<th>Bottles</th>
+<th>Total</th>
+<th>Status</th>
+</tr>
+${rows}
+</table>
+<div style="margin-top:20px;text-align:center;">
+<button class="theme-btn" onclick="navigate('ordersSummary')">
+Back
+</button>
+</div>
+</div>`
+}
 
 /* USERS WITH INLINE EDIT */
 async function loadUsers(){
@@ -423,15 +505,17 @@ loadActiveOrders()
 async function loadSettings(){
 const doc=await db.collection("settings").doc("global").get()
 const price=doc.data()?.price||75
+
 contentArea.innerHTML=`
 <div class="admin-card">
 <h2>Settings</h2>
-<div class="controls">
-<input type="number" id="priceInput" value="${price}">
+<div style="display:flex;gap:15px;margin-top:20px;justify-content:flex-start;align-items:center;">
+<input type="number" id="priceInput" value="${price}" style="width:200px;">
 <button class="theme-btn" onclick="savePrice()">Save</button>
 </div>
 </div>`
 }
+
 
 async function savePrice(){
 await db.collection("settings").doc("global").update({price:Number(priceInput.value)})
