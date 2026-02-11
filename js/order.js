@@ -11,7 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalEl = document.getElementById("total");
 
     const settingsDoc = await db.collection("settings").doc("global").get();
-    const price = settingsDoc.data().price || 75;
+    const settings = settingsDoc.data() || {};
+    const price = settings.price || 75;
 
     updateTotal();
     qtyInput.addEventListener("input", updateTotal);
@@ -42,10 +43,9 @@ async function confirmOrder() {
 
   const userDoc = await db.collection("users").doc(user.uid).get();
   const userData = userDoc.data() || {};
-
   const address = userData.address || {};
 
-  // PROFILE VALIDATION (safe)
+  // Profile validation
   if (!userData.phone ||
       !address.house ||
       !address.city ||
@@ -55,23 +55,19 @@ async function confirmOrder() {
     return;
   }
 
-  const settingsRef = db.collection("settings").doc("global");
-  const settingsDoc = await settingsRef.get();
+  const settingsDoc = await db.collection("settings").doc("global").get();
   const settings = settingsDoc.data() || {};
 
   const price = settings.price || 75;
   const autoAssign = settings.autoAssign;
   const agents = settings.deliveryAgents || [];
+
   let assignedTo = null;
 
+  // SAFE AUTO ASSIGN (NO SETTINGS UPDATE)
   if (autoAssign && agents.length > 0) {
-    const index = settings.lastAssignedIndex || 0;
-    assignedTo = agents[index];
-    const nextIndex = (index + 1) % agents.length;
-
-    await settingsRef.update({
-      lastAssignedIndex: nextIndex
-    });
+    const randomIndex = Math.floor(Math.random() * agents.length);
+    assignedTo = agents[randomIndex];
   }
 
   await db.collection("orders").add({
@@ -84,7 +80,7 @@ async function confirmOrder() {
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
-  // SUCCESS UI (no alert, no redirect)
+  // Success UI
   document.querySelector(".card").innerHTML = `
     <h2 style="margin-bottom:15px;">Order Placed Successfully</h2>
     <p style="margin-bottom:20px; opacity:0.8;">
@@ -97,7 +93,7 @@ async function confirmOrder() {
 }
 
 
-// Reusable UI message
+// UI helper
 function showMessage(text) {
   const card = document.querySelector(".card");
   const msg = document.createElement("div");
