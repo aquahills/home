@@ -1,12 +1,6 @@
-let price = 75; // default fallback
+let price = 75;
 
-document.addEventListener("DOMContentLoaded", async () => {
-
-  const qtyInput = document.getElementById("qty");
-  const totalEl = document.getElementById("total");
-
-  // Show default price immediately
-  totalEl.innerText = qtyInput.value * price;
+document.addEventListener("DOMContentLoaded", () => {
 
   firebase.auth().onAuthStateChanged(async (user) => {
 
@@ -14,6 +8,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       window.location.href = "login.html";
       return;
     }
+
+    const qtyInput = document.getElementById("qty");
+    const totalEl = document.getElementById("total");
 
     try {
 
@@ -23,18 +20,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         price = Number(settings.price);
       }
 
-      totalEl.innerText = qtyInput.value * price;
+    } catch (e) {
+      console.error("Price fetch failed. Using fallback.");
+    }
 
-      qtyInput.addEventListener("input", e => {
-        totalEl.innerText = e.target.value * price;
-      });
+    updateTotal();
 
-    } catch (err) {
-      console.error(err);
-      alert("Unable to fetch price.");
+    qtyInput.addEventListener("input", updateTotal);
+
+    function updateTotal() {
+      const qty = Number(qtyInput.value || 1);
+      totalEl.innerText = qty * price;
     }
 
   });
+
 });
 
 async function confirmOrder() {
@@ -59,6 +59,7 @@ async function confirmOrder() {
     window.location.href = "orders.html";
 
   } catch (err) {
+    console.error(err);
     alert("Order failed. Try again.");
   }
 }
