@@ -1,5 +1,5 @@
 const API_URL =
-  "https://script.google.com/macros/s/AKfycbyUQSVzwLJcwvg_0gg-K5X3eYiIyCdKRjuN-qL47rWaxYRtkM0x4Ujs49gUGvHOetIsLA/exec";
+  "https://script.google.com/macros/s/AKfycbxiXwi3KjOI2RUTxD5jrgovl0BMq0dsKesq3_A6ZnGYnTkktoSXDyWAlTspyIGSr7f4CQ/exec";
 
 async function waitForAuth() {
   return new Promise((resolve) => {
