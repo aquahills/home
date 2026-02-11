@@ -13,8 +13,10 @@
 <header>
   <img src="assets/logo.png" class="logo" />
   <nav>
-    <button onclick="window.location.href='index.html'">Home</button>
-  </nav>
+  <button onclick="window.location.href='order.html'">Order Now</button>
+  <button onclick="window.location.href='index.html'">Home</button>
+</nav>
+
 </header>
 
 <main class="center" id="contentArea">
@@ -44,6 +46,7 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
+
   const content = document.getElementById("contentArea");
   const email = localStorage.getItem("user");
 
@@ -51,7 +54,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     content.innerHTML = `
       <div class="card">
         <h2>You are not logged in</h2>
-        <p>To track your orders and place new ones, please login securely.</p>
+        <p>To track your orders and manage deliveries, please login securely.</p>
         <button onclick="window.location.href='login.html'" class="primary-btn">
           Login / Register
         </button>
@@ -61,7 +64,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    const res = await api("getOrders", { email });
+    const res = await api("getOrders");
     const orders = res.orders || [];
 
     if (orders.length === 0) {
@@ -77,28 +80,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    const current = orders[0];
-
-    let historyHTML = orders.slice(1).map(o => `
-      <li>₹${o.total} • ${o.status} • ${new Date(o.createdAt).toLocaleDateString()}</li>
+    const list = orders.map(o => `
+      <div class="card">
+        <p><strong>Status:</strong> ${o.status}</p>
+        <p><strong>Bottles:</strong> ${o.bottles}</p>
+        <p><strong>Total:</strong> ₹${o.total}</p>
+        <p>${new Date(o.createdAt).toLocaleString()}</p>
+      </div>
     `).join("");
 
-    content.innerHTML = `
-      <div class="card">
-        <h2>Current Order</h2>
-        <p><strong>Status:</strong> ${current.status}</p>
-        <p><strong>Bottles:</strong> ${current.bottles}</p>
-        <p><strong>Total:</strong> ₹${current.total}</p>
-      </div>
-
-      <div class="card">
-        <h2>Order History</h2>
-        <ul>${historyHTML}</ul>
-        <button onclick="window.location.href='order.html'" class="primary-btn">
-          Order Now
-        </button>
-      </div>
-    `;
+    content.innerHTML = list;
 
   } catch (e) {
     content.innerHTML = `
@@ -110,6 +101,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 </script>
+
 
 </body>
 </html>
