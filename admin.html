@@ -11,23 +11,21 @@
   <style>
     body {
       margin: 0;
-      font-family: Arial;
-      background: linear-gradient(to bottom, #123c7c, #1e73be);
-      color: white;
       overflow-x: hidden;
     }
 
     /* ===== TOP BAR ===== */
     .topbar {
-      height: 60px;
+      height: 70px;
       display: flex;
       align-items: center;
-      padding: 0 20px;
-      background: rgba(0,0,0,0.2);
+      padding: 0 25px;
+      background: rgba(0,0,0,0.25);
+      backdrop-filter: blur(10px);
     }
 
     .menu-btn {
-      font-size: 26px;
+      font-size: 28px;
       cursor: pointer;
       margin-right: 20px;
     }
@@ -35,14 +33,15 @@
     /* ===== SIDEBAR ===== */
     .sidebar {
       position: fixed;
-      left: -250px;
+      left: -270px;
       top: 0;
-      width: 250px;
+      width: 260px;
       height: 100%;
-      background: #111;
-      padding: 20px;
+      background: linear-gradient(180deg, #062c5c 0%, #0a5fd8 100%);
+      padding: 30px 20px;
       transition: 0.3s ease;
-      z-index: 1000;
+      z-index: 1001;
+      box-shadow: 5px 0 20px rgba(0,0,0,0.4);
     }
 
     .sidebar.active {
@@ -50,35 +49,56 @@
     }
 
     .sidebar h2 {
-      margin-bottom: 30px;
+      margin-bottom: 35px;
+      font-weight: 600;
     }
 
     .sidebar button {
       width: 100%;
-      padding: 10px;
-      margin-bottom: 12px;
-      border: none;
-      border-radius: 8px;
-      background: #222;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 25px;
+      border: 1px solid rgba(255,255,255,0.3);
+      background: transparent;
       color: white;
+      font-weight: 600;
       cursor: pointer;
+      transition: 0.3s ease;
     }
 
     .sidebar button:hover {
-      background: #333;
+      background: white;
+      color: #0a5fd8;
+    }
+
+    /* ===== OVERLAY ===== */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      z-index: 1000;
+    }
+
+    .overlay.active {
+      display: block;
     }
 
     /* ===== CONTENT ===== */
     .content {
-      padding: 30px;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: calc(100vh - 70px);
     }
 
-    .card {
-      background: rgba(255,255,255,0.1);
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      backdrop-filter: blur(8px);
+    .content-wrapper {
+      width: 100%;
+      max-width: 1000px;
     }
 
     table {
@@ -88,17 +108,9 @@
     }
 
     th, td {
-      padding: 10px;
+      padding: 12px;
       border-bottom: 1px solid rgba(255,255,255,0.2);
-    }
-
-    .primary-btn {
-      padding: 6px 10px;
-      border: none;
-      border-radius: 6px;
-      background: #0d6efd;
-      color: white;
-      cursor: pointer;
+      text-align: left;
     }
 
     input {
@@ -106,6 +118,7 @@
       border-radius: 6px;
       border: none;
       margin-top: 8px;
+      width: 200px;
     }
   </style>
 </head>
@@ -118,53 +131,39 @@
 </div>
 
 <div class="sidebar" id="sidebar">
-  <div id="overlay" onclick="closeSidebar()" 
-     style="
-       position:fixed;
-       top:0;
-       left:0;
-       width:100%;
-       height:100%;
-       background:rgba(0,0,0,0.4);
-       display:none;
-       z-index:999;
-     ">
-</div>
-
   <h2>Admin</h2>
-  <button onclick="showSection('dashboard')">Dashboard</button>
-  <button onclick="showSection('orders')">Orders</button>
-  <button onclick="showSection('users')">Users</button>
-  <button onclick="showSection('settings')">Settings</button>
+  <button onclick="navigate('dashboard')">Dashboard</button>
+  <button onclick="navigate('orders')">Orders</button>
+  <button onclick="navigate('users')">Users</button>
+  <button onclick="navigate('settings')">Settings</button>
   <button onclick="logout()">Logout</button>
 </div>
 
-<div class="content" id="contentArea">
-  Loading...
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<div class="content">
+  <div class="content-wrapper" id="contentArea">
+    Loading...
+  </div>
 </div>
 
 <script src="js/firebase.js"></script>
 
 <script>
-
 function toggleSidebar() {
-  const sidebar = document.getElementById("sidebar");
-  const overlay = document.getElementById("overlay");
-
-  sidebar.classList.toggle("active");
-
-  if (sidebar.classList.contains("active")) {
-    overlay.style.display = "block";
-  } else {
-    overlay.style.display = "none";
-  }
+  document.getElementById("sidebar").classList.toggle("active");
+  document.getElementById("overlay").classList.toggle("active");
 }
 
 function closeSidebar() {
   document.getElementById("sidebar").classList.remove("active");
-  document.getElementById("overlay").style.display = "none";
+  document.getElementById("overlay").classList.remove("active");
 }
 
+function navigate(section) {
+  closeSidebar();
+  showSection(section);
+}
 
 firebase.auth().onAuthStateChanged(async (user) => {
 
@@ -197,8 +196,6 @@ function showSection(section) {
   if (section === "settings") loadSettings();
 }
 
-/* ===== DASHBOARD ===== */
-
 async function loadDashboard() {
   const orders = await db.collection("orders").get();
   const users = await db.collection("users").get();
@@ -211,8 +208,6 @@ async function loadDashboard() {
     </div>
   `;
 }
-
-/* ===== ORDERS ===== */
 
 async function loadOrders() {
   const snapshot = await db.collection("orders")
@@ -249,8 +244,6 @@ async function loadOrders() {
   `;
 }
 
-/* ===== USERS ===== */
-
 async function loadUsers() {
   const snapshot = await db.collection("users").get();
 
@@ -282,8 +275,6 @@ async function loadUsers() {
   `;
 }
 
-/* ===== SETTINGS ===== */
-
 async function loadSettings() {
   const doc = await db.collection("settings").doc("global").get();
   const data = doc.data() || {};
@@ -304,7 +295,6 @@ async function savePrice() {
   await db.collection("settings").doc("global").update({ price });
   alert("Price updated");
 }
-
 </script>
 
 </body>
