@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="css/style.css">
 
-  <!-- Font Awesome same as order.html -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -14,7 +13,6 @@
 
   <style>
 
-    /* MATCH ORDER.HTML HEADER */
     .logo{
       height:115px !important;
     }
@@ -25,42 +23,50 @@
       }
     }
 
-    /* Table Styling */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      color: white;
-      text-align: center;
+    /* Prevent page overflow */
+    body{
+      overflow-x:hidden;
     }
 
-    th, td {
-      padding: 14px;
-      border-bottom: 1px solid rgba(255,255,255,0.2);
-    }
-
-    th {
-      opacity: 0.9;
-    }
-
-    a {
-      color: #00e1ff;
-      cursor: pointer;
-      text-decoration: underline;
-      font-weight: 600;
-    }
-
-    a:hover {
-      opacity: 0.8;
-    }
-
-    /* Match order card width */
     .orders-card{
       width:100%;
       max-width:1000px;
       text-align:center;
+      overflow:hidden;
     }
 
-    /* MATCH ORDER FOOTER EXACTLY */
+    /* TABLE WRAPPER FIX */
+    .table-wrapper{
+      width:100%;
+      overflow-x:auto;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    table{
+      width:100%;
+      min-width:600px;
+      border-collapse:collapse;
+      color:white;
+      text-align:center;
+    }
+
+    th, td{
+      padding:14px;
+      border-bottom:1px solid rgba(255,255,255,0.2);
+    }
+
+    a{
+      color:#00e1ff;
+      cursor:pointer;
+      text-decoration:underline;
+      font-weight:600;
+    }
+
+    a:hover{
+      opacity:.8;
+    }
+
+    /* FOOTER MATCH */
     .footer{
       background:rgba(0,0,0,.55) !important;
       padding:55px 20px 25px !important;
@@ -85,8 +91,9 @@
       }
     }
 
-    /* Mobile Header Fix */
+    /* MOBILE HEADER FIX */
     @media(max-width:768px){
+
       header{
         flex-direction:column;
         align-items:center;
@@ -104,6 +111,7 @@
         width:100%;
         max-width:280px;
       }
+
     }
 
   </style>
@@ -111,7 +119,6 @@
 
 <body>
 
-<!-- SAME HEADER AS ORDER.HTML -->
 <header>
   <img src="assets/logo.png" class="logo" />
 
@@ -125,7 +132,6 @@
   <div class="card orders-card"><h2>Loading...</h2></div>
 </main>
 
-<!-- SAME FOOTER AS ORDER.HTML -->
 <footer class="footer">
 <div class="footer-container">
 
@@ -199,10 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (snapshot.empty) {
         content.innerHTML = `
           <div class="card orders-card">
-            <h2 style="margin-bottom:10px;">No Orders Yet</h2>
-            <p style="margin-bottom:20px; opacity:0.8;">
-              You haven’t placed any orders yet.
-            </p>
+            <h2>No Orders Yet</h2>
             <button class="primary-btn" onclick="window.location.href='order.html'">
               Order Now
             </button>
@@ -233,16 +236,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
       content.innerHTML = `
         <div class="card orders-card">
-          <h2 style="margin-bottom:20px;">Your Orders</h2>
-          <table>
-            <tr>
-              <th>Order ID</th>
-              <th>Status</th>
-              <th>Bottles</th>
-              <th>Total</th>
-            </tr>
-            ${rows}
-          </table>
+          <h2>Your Orders</h2>
+          <div class="table-wrapper">
+            <table>
+              <tr>
+                <th>Order ID</th>
+                <th>Status</th>
+                <th>Bottles</th>
+                <th>Total</th>
+              </tr>
+              ${rows}
+            </table>
+          </div>
         </div>
       `;
 
@@ -251,7 +256,6 @@ document.addEventListener("DOMContentLoaded", () => {
       content.innerHTML = `
         <div class="card orders-card">
           <h2>Unable to load orders</h2>
-          <p>Please refresh the page.</p>
         </div>
       `;
     }
@@ -260,23 +264,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-
 async function loadSingleOrder(orderId) {
-
   const doc = await db.collection("orders").doc(orderId).get();
   if (!doc.exists) return;
-
   showSingleOrder(orderId, doc.data());
 }
 
-
 function showSingleOrder(orderId, data) {
-
   const content = document.getElementById("contentArea");
-
   content.innerHTML = `
     <div class="card orders-card">
-      <h2 style="margin-bottom:15px;">Order Details</h2>
+      <h2>Order Details</h2>
       <p><strong>Order ID:</strong> ${orderId}</p>
       <p><strong>Status:</strong> ${data.status}</p>
       <p><strong>Bottles:</strong> ${data.bottles}</p>
