@@ -1,43 +1,39 @@
-let price = 0;
+let price = 75;
 
 document.addEventListener("DOMContentLoaded", () => {
 
   firebase.auth().onAuthStateChanged(async (user) => {
 
+    // Correct condition
     if (!user) {
       window.location.href = "login.html";
       return;
     }
 
-    try {
+    const qtyInput = document.getElementById("qty");
+    const totalEl = document.getElementById("total");
 
-      // Fetch price ONLY after user is confirmed
+    try {
       const settings = await api("getSettings");
 
-      if (settings.error) {
-        throw new Error(settings.error);
+      if (!settings.error && settings.price) {
+        price = Number(settings.price);
       }
+    } catch (e) {
+      console.error("Price fetch failed. Using fallback 75.");
+    }
 
-      price = Number(settings.price || 75);
+    updateTotal();
+    qtyInput.addEventListener("input", updateTotal);
 
-      const qtyInput = document.getElementById("qty");
-      const totalEl = document.getElementById("total");
-
-      totalEl.innerText = qtyInput.value * price;
-
-      qtyInput.addEventListener("input", e => {
-        totalEl.innerText = e.target.value * price;
-      });
-
-    } catch (err) {
-      console.error("Price fetch error:", err);
-      alert("Unable to fetch price. Please check backend deployment.");
+    function updateTotal() {
+      const qty = Number(qtyInput.value || 1);
+      totalEl.innerText = qty * price;
     }
 
   });
 
 });
-
 
 async function confirmOrder() {
 
@@ -61,7 +57,7 @@ async function confirmOrder() {
     window.location.href = "orders.html";
 
   } catch (err) {
-    console.error("Order creation failed:", err);
-    alert("Order failed. Please try again.");
+    console.error("Order failed:", err);
+    alert("Order failed. Try again.");
   }
 }
