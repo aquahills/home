@@ -36,6 +36,47 @@
       cursor:pointer;
     }
 
+    /* ===== MATCH INDEX HEADER EXACTLY ===== */
+
+/* Force large logo like index */
+.logo{
+  height:115px !important;
+}
+
+/* On mobile match index logo size */
+@media(max-width:768px){
+  .logo{
+    height:85px !important;
+  }
+}
+
+/* ===== FIX FOOTER SCATTER ON DESKTOP ===== */
+
+.footer{
+  background:rgba(0,0,0,.55) !important;
+  padding:55px 20px 25px !important;
+}
+
+.footer-container{
+  display:flex !important;
+  justify-content:center !important;
+  gap:60px !important;
+  flex-wrap:wrap !important;
+  text-align:center !important;
+}
+
+.footer-container div{
+  min-width:220px !important;
+}
+
+/* Keep mobile stacking same as index */
+@media(max-width:480px){
+  .footer-container{
+    flex-direction:column !important;
+    gap:30px !important;
+  }
+}
+
     .qty-controls input{
       width:70px;
       text-align:center;
