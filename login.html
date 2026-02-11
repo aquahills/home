@@ -29,22 +29,44 @@
       text-align:center;
     }
 
-    .google-btn{
-      width:100%;
-      padding:14px;
-      border-radius:30px;
-      border:none;
-      background:white;
-      color:#0a5fd8;
-      font-weight:600;
-      font-size:16px;
-      cursor:pointer;
-      transition:.3s;
-    }
+    /* GOOGLE BUTTON */
+.google-btn{
+  width:100%;
+  padding:14px;
+  border-radius:30px;
+  border:none;
+  background:white;
+  color:#444;
+  font-weight:600;
+  font-size:16px;
+  cursor:pointer;
+  transition:.3s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px; /* Proper spacing between logo and text */
+}
 
-    .google-btn:hover{
-      transform:scale(1.05);
-    }
+.google-btn:hover{
+  transform:scale(1.05);
+}
+
+/* Google official colored G */
+.google-icon{
+  font-weight:bold;
+  font-size:18px;
+  background:linear-gradient(
+    45deg,
+    #4285F4 25%,
+    #34A853 25%,
+    #34A853 50%,
+    #FBBC05 50%,
+    #FBBC05 75%,
+    #EA4335 75%
+  );
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
 
     /* MOBILE HEADER FIX */
     @media(max-width:768px){
@@ -112,8 +134,10 @@
     <h2 style="margin-bottom:20px;">Login / Register</h2>
 
     <button class="google-btn" onclick="startGoogleLogin()">
-      <i class="fab fa-google"></i> Continue with Google
-    </button>
+  <span class="google-icon">G</span>
+  <span>Continue with Google</span>
+</button>
+
 
   </div>
 
