@@ -5,63 +5,116 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="css/style.css">
 
+  <!-- Font Awesome same as order.html -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
   <style>
-    .orders-wrapper{
-      width:100%;
-      max-width:1000px;
-    }
 
-    .table-container{
-      width:100%;
-      overflow-x:auto;
-    }
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-      color:white;
-      min-width:600px;
-    }
-
-    th,td{
-      padding:12px;
-      border-bottom:1px solid rgba(255,255,255,0.2);
-      text-align:center;
-    }
-
-    a{
-      color:#00e1ff;
-      cursor:pointer;
-      text-decoration:underline;
+    /* MATCH ORDER.HTML HEADER */
+    .logo{
+      height:115px !important;
     }
 
     @media(max-width:768px){
+      .logo{
+        height:85px !important;
+      }
+    }
+
+    /* Table Styling */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      color: white;
+      text-align: center;
+    }
+
+    th, td {
+      padding: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+
+    th {
+      opacity: 0.9;
+    }
+
+    a {
+      color: #00e1ff;
+      cursor: pointer;
+      text-decoration: underline;
+      font-weight: 600;
+    }
+
+    a:hover {
+      opacity: 0.8;
+    }
+
+    /* Match order card width */
+    .orders-card{
+      width:100%;
+      max-width:1000px;
+      text-align:center;
+    }
+
+    /* MATCH ORDER FOOTER EXACTLY */
+    .footer{
+      background:rgba(0,0,0,.55) !important;
+      padding:55px 20px 25px !important;
+    }
+
+    .footer-container{
+      display:flex !important;
+      justify-content:center !important;
+      gap:60px !important;
+      flex-wrap:wrap !important;
+      text-align:center !important;
+    }
+
+    .footer-container div{
+      min-width:220px !important;
+    }
+
+    @media(max-width:480px){
+      .footer-container{
+        flex-direction:column !important;
+        gap:30px !important;
+      }
+    }
+
+    /* Mobile Header Fix */
+    @media(max-width:768px){
       header{
         flex-direction:column;
+        align-items:center;
+        text-align:center;
         gap:15px;
       }
 
       nav{
         flex-direction:column;
+        align-items:center;
         width:100%;
       }
 
       nav button{
         width:100%;
-        max-width:260px;
+        max-width:280px;
       }
     }
+
   </style>
 </head>
 
 <body>
 
+<!-- SAME HEADER AS ORDER.HTML -->
 <header>
   <img src="assets/logo.png" class="logo" />
+
   <nav>
     <button onclick="window.location.href='order.html'">Order</button>
     <button onclick="window.location.href='index.html'">Home</button>
@@ -69,26 +122,41 @@
 </header>
 
 <main class="center" id="contentArea">
-  <div class="card"><h2>Loading...</h2></div>
+  <div class="card orders-card"><h2>Loading...</h2></div>
 </main>
 
+<!-- SAME FOOTER AS ORDER.HTML -->
 <footer class="footer">
-  <div class="footer-container">
-    <div>
-      <h3>Aquahills Beverages</h3>
-      <p>Pure & Safe Drinking Water</p>
-    </div>
-    <div>
-      <h4>Contact</h4>
-      <p>Phone: +91 9876543210</p>
-      <p>Email: support@aquahills.com</p>
-    </div>
-    <div>
-      <h4>Location</h4>
-      <p>Ghaziabad, Uttar Pradesh</p>
-    </div>
-  </div>
-  <p class="footer-bottom">© 2026 Aquahills Beverages</p>
+<div class="footer-container">
+
+<div>
+<h3>Aquahills Beverages</h3>
+<p>Pure & Safe Drinking Water</p>
+
+<div class="social-icons">
+<i class="fab fa-facebook-f"></i>
+<i class="fab fa-instagram"></i>
+<i class="fab fa-youtube"></i>
+<i class="fab fa-linkedin-in"></i>
+</div>
+</div>
+
+<div>
+<h4>Contact</h4>
+<p><i class="fa-solid fa-phone"></i> +91 9876543210</p>
+<p><i class="fa-solid fa-envelope"></i> support@aquahills.com</p>
+</div>
+
+<div>
+<h4>Location</h4>
+<p><i class="fa-solid fa-location-dot"></i> Ghaziabad, Uttar Pradesh</p>
+</div>
+
+</div>
+
+<p class="footer-bottom">
+© 2026 Aquahills Beverages | ISI & BIS Certified | All Rights Reserved
+</p>
 </footer>
 
 <script src="js/firebase.js"></script>
@@ -130,9 +198,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (snapshot.empty) {
         content.innerHTML = `
-          <div class="card" style="text-align:center;">
-            <h2>No Orders Yet</h2>
-            <button class="primary-btn" style="margin-top:20px;" onclick="window.location.href='order.html'">
+          <div class="card orders-card">
+            <h2 style="margin-bottom:10px;">No Orders Yet</h2>
+            <p style="margin-bottom:20px; opacity:0.8;">
+              You haven’t placed any orders yet.
+            </p>
+            <button class="primary-btn" onclick="window.location.href='order.html'">
               Order Now
             </button>
           </div>
@@ -147,6 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       let rows = "";
+
       snapshot.forEach(doc => {
         const o = doc.data();
         rows += `
@@ -160,27 +232,26 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       content.innerHTML = `
-        <div class="card orders-wrapper">
+        <div class="card orders-card">
           <h2 style="margin-bottom:20px;">Your Orders</h2>
-          <div class="table-container">
-            <table>
-              <tr>
-                <th>Order ID</th>
-                <th>Status</th>
-                <th>Bottles</th>
-                <th>Total</th>
-              </tr>
-              ${rows}
-            </table>
-          </div>
+          <table>
+            <tr>
+              <th>Order ID</th>
+              <th>Status</th>
+              <th>Bottles</th>
+              <th>Total</th>
+            </tr>
+            ${rows}
+          </table>
         </div>
       `;
 
     } catch (error) {
 
       content.innerHTML = `
-        <div class="card">
+        <div class="card orders-card">
           <h2>Unable to load orders</h2>
+          <p>Please refresh the page.</p>
         </div>
       `;
     }
@@ -189,17 +260,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
+
 async function loadSingleOrder(orderId) {
+
   const doc = await db.collection("orders").doc(orderId).get();
   if (!doc.exists) return;
+
   showSingleOrder(orderId, doc.data());
 }
 
+
 function showSingleOrder(orderId, data) {
+
   const content = document.getElementById("contentArea");
 
   content.innerHTML = `
-    <div class="card" style="max-width:420px;">
+    <div class="card orders-card">
       <h2 style="margin-bottom:15px;">Order Details</h2>
       <p><strong>Order ID:</strong> ${orderId}</p>
       <p><strong>Status:</strong> ${data.status}</p>
