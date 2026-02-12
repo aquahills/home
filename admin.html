@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Panel</title>
 <link rel="stylesheet" href="css/style.css">
 
@@ -45,7 +46,7 @@ overflow-x:auto;
 }
 
 table{
-min-width:600px;
+min-width:500px;
 }
 
 /* ===== MOBILE STACK CONTROLS ===== */
@@ -545,7 +546,7 @@ rows+=`
 contentArea.innerHTML=`
 <div class="admin-card">
 <h2>All Users</h2>
-<div class="table-wrapper">
+
 <div class="controls">
 <input type="text" id="searchInput" placeholder="Search..." onkeyup="searchUsers()">
 <select id="roleFilter" onchange="filterUsers()">
@@ -556,6 +557,7 @@ contentArea.innerHTML=`
 </select>
 </div>
 
+<div class="table-wrapper">
 <table id="usersTable">
 <tr>
 <th>Name</th>
