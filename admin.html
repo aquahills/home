@@ -289,6 +289,33 @@ justify-content:center;
 gap:15px;
 margin-top:20px
 }
+  
+/* ===== STRICT MOBILE CONTAINER CONTROL ===== */
+@media(max-width:768px){
+
+.content{
+padding:20px 10px !important;
+}
+
+.wrapper{
+width:100% !important;
+max-width:100% !important;
+}
+
+.admin-card{
+width:100% !important;
+padding:20px !important;
+}
+
+.dashboard-grid{
+grid-template-columns:1fr !important;
+}
+
+.stat{
+width:100% !important;
+}
+}
+
 </style>
 </head>
 
@@ -500,13 +527,28 @@ const snap=await db.collection("orders").where("customerId","==",id).get()
 let rows=""
 snap.forEach(doc=>{
 const o=doc.data()
+
+let formattedDate=""
+if(o.createdAt){
+formattedDate = o.createdAt.toDate().toLocaleString("en-IN", {
+timeZone: "Asia/Kolkata",
+year: "numeric",
+month: "short",
+day: "numeric",
+hour: "2-digit",
+minute: "2-digit"
+})
+}
+
 rows+=`
 <tr>
 <td>${o.bottles}</td>
 <td>₹${o.total}</td>
+<td>${formattedDate}</td>
 <td>${o.status}</td>
 </tr>`
 })
+
 
 contentArea.innerHTML=`
 <div class="admin-card">
@@ -516,6 +558,7 @@ contentArea.innerHTML=`
 <tr>
 <th>Bottles</th>
 <th>Total</th>
+<th>Date & Time (IST)</th>
 <th>Status</th>
 </tr>
 ${rows}
@@ -711,9 +754,26 @@ contentArea.innerHTML=`
 }
 
 async function savePrice(){
-await db.collection("settings").doc("global").update({price:Number(priceInput.value)})
-alert("Updated")
+
+await db.collection("settings").doc("global").update({
+price:Number(priceInput.value)
+})
+
+const card = document.querySelector(".admin-card")
+
+const msg = document.createElement("div")
+msg.style.marginTop="20px"
+msg.style.opacity="0.9"
+msg.innerText="Price updated successfully."
+
+card.appendChild(msg)
+
+setTimeout(()=>{
+msg.remove()
+},2500)
+
 }
+
 </script>
 
 </body>
