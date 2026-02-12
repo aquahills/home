@@ -133,11 +133,11 @@ nav button:hover {
 
 /* ===== FOOTER ===== */
 
-/* ===== PROFESSIONAL FOOTER ===== */
+/* ===== PROFESSIONAL FOOTER FINAL FIX ===== */
 
 .footer{
   background: rgba(0,0,0,0.55);
-  padding: 60px 20px 30px;
+  padding: 75px 20px 45px;   /* more breathing room */
   text-align: center;
 }
 
@@ -145,42 +145,42 @@ nav button:hover {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 80px;
+  gap: 100px;                 /* wider spacing between columns */
   flex-wrap: wrap;
   max-width: 1100px;
   margin: auto;
+  margin-bottom: 50px;        /* space before copyright */
 }
 
 .footer-brand,
 .footer-contact{
-  min-width: 250px;
+  min-width: 260px;
 }
 
-.footer h3{
-  font-size: 20px;
-  margin-bottom: 8px;
-  font-weight: 600;
-}
-
+/* ✅ SAME SIZE HEADINGS */
+.footer h3,
 .footer h4{
-  font-size: 16px;
-  margin-bottom: 12px;
+  font-size: 18px;            /* identical size */
   font-weight: 600;
-  opacity: 0.95;
+  margin-bottom: 18px;
+  letter-spacing: 0.5px;
 }
 
+/* Tagline */
 .footer .tagline{
   font-size: 14px;
   opacity: 0.8;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
+/* Text */
 .footer p{
   font-size: 14px;
-  margin: 6px 0;
+  margin: 8px 0;
   opacity: 0.85;
 }
 
+/* Links */
 .footer a{
   color: white;
   text-decoration: none;
@@ -192,11 +192,12 @@ nav button:hover {
   text-decoration: underline;
 }
 
+/* Social */
 .social-icons{
-  margin-top: 15px;
+  margin-top: 20px;
   display: flex;
   justify-content: center;
-  gap: 18px;
+  gap: 20px;
   font-size: 18px;
 }
 
@@ -210,26 +211,29 @@ nav button:hover {
   transform: scale(1.15);
 }
 
+/* ✅ CLEAR COPYRIGHT SEPARATION */
 .footer-bottom{
-  margin-top: 35px;
+  padding-top: 30px;
+  margin-top: 50px;
+  border-top: 1px solid rgba(255,255,255,0.15);
   font-size: 13px;
   opacity: 0.6;
 }
 
-/* ===== MOBILE OPTIMIZATION ===== */
+/* ===== MOBILE ===== */
 
 @media(max-width:768px){
 
   .footer-container{
     flex-direction: column;
-    gap: 40px;
+    gap: 50px;
   }
 
   .footer{
-    padding: 50px 15px 25px;
+    padding: 60px 15px 35px;
   }
-
 }
+
 
 
 /* ===== LOGIN PAGE CENTERING ===== */
