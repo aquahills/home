@@ -54,3 +54,13 @@ function startGoogleLogin() {
       alert("Login failed.");
     });
 }
+firebase.auth().onAuthStateChanged(async (user)=>{
+  if(!user) return;
+
+  const doc = await db.collection("users").doc(user.uid).get();
+  const data = doc.data();
+
+  if(data?.guest && data?.phone){
+    localStorage.setItem("guestPhone", data.phone);
+  }
+});
