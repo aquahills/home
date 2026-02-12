@@ -697,28 +697,47 @@ loadUsers()
 }
 
 /* ACTIVE ORDERS (unchanged logic) */
+/* ACTIVE ORDERS */
 async function loadActiveOrders(){
-const snap=await db.collection("orders")
+
+const snap = await db.collection("orders")
 .where("status","in",["Pending","Assigned"])
 .get()
 
 let rows=""
+
 for(const doc of snap.docs){
-const o=doc.data()
-const uDoc=await db.collection("users").doc(o.customerId).get()
-const u=uDoc.data()||{}
-rows+=`
+
+const o = doc.data()
+
+const uDoc = await db.collection("users").doc(o.customerId).get()
+const u = uDoc.data() || {}
+
+// Get Assigned Delivery Agent
+let assignedName = "Not Assigned"
+
+if(o.assignedTo){
+  const agentDoc = await db.collection("users").doc(o.assignedTo).get()
+  const agentData = agentDoc.data()
+  assignedName = agentData?.name || agentData?.email || "Assigned"
+}
+
+rows += `
 <tr>
 <td>${u.name||""}</td>
 <td>${u.phone||""}</td>
 <td>${o.bottles}</td>
 <td>₹${o.total}</td>
+<td>${assignedName}</td>
 <td>
-<button class="theme-btn success-btn" onclick="markDelivered('${doc.id}')">Mark Delivered</button>
+<button class="theme-btn success-btn" onclick="markDelivered('${doc.id}')">
+Mark Delivered
+</button>
 </td>
 </tr>`
 }
-contentArea.innerHTML=`
+
+contentArea.innerHTML = `
 <div class="admin-card">
 <h2>Active Orders</h2>
 <div class="table-wrapper">
@@ -728,6 +747,7 @@ contentArea.innerHTML=`
 <th>Phone</th>
 <th>Bottles</th>
 <th>Total</th>
+<th>Assigned To</th>
 <th>Action</th>
 </tr>
 ${rows}
@@ -735,6 +755,7 @@ ${rows}
 </div>
 </div>`
 }
+
 
 async function markDelivered(id){
 await db.collection("orders").doc(id).update({status:"Delivered"})
