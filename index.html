@@ -416,7 +416,7 @@ document.querySelector(".carousel-container").style.display="none"
 
 const snap=await db.collection("orders")
 .where("assignedTo","==",uid)
-.where("status","!=","Delivered")
+.where("status","in",["Pending","Assigned"])
 .get()
 
 let rows=""
