@@ -190,36 +190,34 @@ text-align:center;
 
 .dashboard-grid{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-gap:30px;
+grid-template-columns:repeat(auto-fit,minmax(260px,420px));
 justify-content:center;
-max-width:900px;
-margin:auto;
+gap:20px;
 }
+
 
 .stat{
 background:rgba(255,255,255,.2);
-padding:28px 20px;
+padding:22px 20px;
 border-radius:18px;
 text-align:center;
 cursor:pointer;
 transition:.3s;
-min-height:170px;
-display:flex;
-flex-direction:column;
-justify-content:center;
+max-width:420px;
+margin:auto;
 }
 
 .stat h2{
-font-size:36px;
-margin:10px 0 5px 0;
+font-size:32px;
+margin-bottom:8px;
 }
 
 .stat p{
-font-size:18px;
+font-size:16px;
 font-weight:500;
 letter-spacing:0.5px;
 }
+
 
 .stat:hover{transform:translateY(-5px)}
 
@@ -345,13 +343,10 @@ width:100% !important;
 <div class="menu-btn" onclick="toggleSidebar()">☰</div>
 
 <div class="nav-buttons">
-<button id="adminBackBtn" style="display:none;" onclick="navigate('dashboard')">
-Back
-</button>
 <button onclick="window.location.href='index.html'">Home</button>
 <button onclick="logout()">Logout</button>
 </div>
-
+</div>
 
 <img src="assets/logo.png" class="logo">
 
@@ -404,24 +399,13 @@ showSection("dashboard")
 function logout(){firebase.auth().signOut().then(()=>location.href="index.html")}
 
 function showSection(s){
-
-const backBtn = document.getElementById("adminBackBtn")
-
-if(s === "dashboard"){
-backBtn.style.display = "none"
-loadDashboard()
-return
-}
-
-backBtn.style.display = "inline-block"
-
+if(s==="dashboard")loadDashboard()
 if(s==="users")loadUsers()
 if(s==="activeOrders")loadActiveOrders()
 if(s==="ordersSummary")loadOrdersSummary()
 if(s==="settings")loadSettings()
 if(s==="assignOrders")loadAssignOrders()
 }
-
 
 async function loadAssignOrders(){
 
