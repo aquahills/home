@@ -15,11 +15,37 @@ body{margin:0;overflow-x:hidden}
 /* ===== MOBILE HEADER FIX (same style as order.html) ===== */
 @media(max-width:768px){
 
+@media(max-width:768px){
+
 .topbar-row{
 flex-direction:column;
-align-items:center;
+align-items:stretch;
 gap:15px;
 }
+
+/* Keep menu icon aligned left */
+.menu-btn{
+align-self:flex-start;
+margin-left:10px;
+}
+
+.nav-buttons{
+flex-direction:column;
+align-items:center;
+width:100%;
+}
+
+.nav-buttons button{
+width:100%;
+max-width:280px;
+}
+
+.logo{
+height:85px !important;
+}
+
+}
+
 
 .nav-buttons{
 flex-direction:column;
