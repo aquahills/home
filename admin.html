@@ -1075,6 +1075,29 @@ loadAssignOrders = async function(){
   await originalLoadAssignOrders();
 };
 
+  // ===== REGISTER ADMIN FOR PUSH =====
+firebase.auth().onAuthStateChanged(async (user) => {
+
+  if (!user) return;
+
+  const doc = await db.collection("users").doc(user.uid).get();
+  if (doc.data()?.role !== "admin") return;
+
+  const messaging = firebase.messaging();
+
+  await Notification.requestPermission();
+
+  const token = await messaging.getToken({
+    vapidKey: "BHYtt5LCQct0BbqHgb0nQvmpaN4gdyn7ChppNJ4EViM0W8jJjDjQA_u-9X8Jz1xX4N7vLCR-DsPGTxjlpxbsyeg"
+  });
+
+  if (token) {
+    await db.collection("users").doc(user.uid).update({
+      fcmToken: token
+    });
+  }
+});
+
 </script>
 
 </body>
