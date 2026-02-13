@@ -922,17 +922,26 @@ msg.remove()
 
 /* ===========================
    ADMIN REAL-TIME ORDER NOTIFICATIONS
-   + VIBRATION
-   + SIDEBAR BADGE (ASSIGN ORDERS)
-   + SOFT ALERT SOUND
+   FIXED SOUND + VIBRATION + ACCURATE COUNT
 =========================== */
 
-let notifiedOrders = new Set();
 let unreadCount = 0;
+let audioUnlocked = false;
 
-// Softer, longer notification tone
-let notificationSound = new Audio("https://actions.google.com/sounds/v1/notifications/notification_3.mp3");
-notificationSound.volume = 1.0; // louder but soft tone
+// Softer, longer premium notification tone
+let notificationSound = new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
+notificationSound.volume = 1.0;
+
+// Unlock audio after first interaction
+document.addEventListener("click", () => {
+  if (!audioUnlocked) {
+    notificationSound.play().then(() => {
+      notificationSound.pause();
+      notificationSound.currentTime = 0;
+      audioUnlocked = true;
+    }).catch(()=>{});
+  }
+}, { once: true });
 
 function attachBadgeToAssignButton() {
 
@@ -949,6 +958,8 @@ function attachBadgeToAssignButton() {
 
   assignBtn.style.position = "relative";
 
+  if (document.getElementById("assignOrderBadge")) return;
+
   let badge = document.createElement("div");
   badge.id = "assignOrderBadge";
   badge.style.position = "absolute";
@@ -964,7 +975,7 @@ function attachBadgeToAssignButton() {
   badge.style.alignItems = "center";
   badge.style.justifyContent = "center";
   badge.style.fontWeight = "600";
-  badge.style.padding = "0 5px";
+  badge.style.padding = "0 6px";
   badge.style.display = "none";
 
   assignBtn.appendChild(badge);
@@ -976,7 +987,7 @@ function updateBadge(){
 
   if(unreadCount > 0){
     badge.style.display = "flex";
-    badge.innerText = unreadCount;
+    badge.innerText = unreadCount > 9 ? "9+" : unreadCount;
   }else{
     badge.style.display = "none";
   }
@@ -1004,31 +1015,37 @@ firebase.auth().onAuthStateChanged(async user => {
     .where("status", "==", "Pending")
     .onSnapshot(snapshot => {
 
+      // Count ONLY unassigned orders
+      const unassigned = snapshot.docs.filter(doc => {
+        return !doc.data().assignedTo;
+      });
+
+      unreadCount = unassigned.length;
+      updateBadge();
+
+      // Only notify for NEWLY added unassigned orders
       snapshot.docChanges().forEach(change => {
 
         if (change.type === "added") {
 
-          const orderId = change.doc.id;
+          const data = change.doc.data();
+          if (data.assignedTo) return;
 
-          if (notifiedOrders.has(orderId)) return;
-          notifiedOrders.add(orderId);
+          // 🔊 SOUND FIX
+          if (audioUnlocked) {
+            notificationSound.currentTime = 0;
+            notificationSound.play().catch(()=>{});
+          }
 
-          unreadCount++;
-          updateBadge();
-
-          // Play softer alert
-          notificationSound.currentTime = 0;
-          notificationSound.play().catch(()=>{});
-
-          // Mobile vibration
+          // 📳 VIBRATION FIX
           if (navigator.vibrate) {
-            navigator.vibrate([200, 100, 200, 100, 200]);
+            navigator.vibrate([300, 150, 300, 150, 400]);
           }
 
           if (Notification.permission === "granted") {
 
             const notification = new Notification("New Order Received", {
-              body: "Order ID: " + orderId,
+              body: "A new order needs assignment.",
               icon: "assets/logo.png"
             });
 
@@ -1047,13 +1064,12 @@ firebase.auth().onAuthStateChanged(async user => {
 
 });
 
-// Clear unread when opening Assign Orders manually
+// Clear unread when Assign Orders opened
 const originalLoadAssignOrders = loadAssignOrders;
 loadAssignOrders = async function(){
   clearUnread();
   await originalLoadAssignOrders();
 };
-
 
 </script>
 
