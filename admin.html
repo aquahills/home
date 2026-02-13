@@ -922,10 +922,53 @@ msg.remove()
 
 /* ===========================
    ADMIN REAL-TIME ORDER NOTIFICATIONS
+   + VIBRATION
+   + UNREAD COUNTER
 =========================== */
 
 let notifiedOrders = new Set();
+let unreadCount = 0;
+
 let notificationSound = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+
+// Create unread badge dynamically
+function createUnreadBadge(){
+  let badge = document.createElement("div");
+  badge.id = "orderBadge";
+  badge.style.position = "absolute";
+  badge.style.top = "8px";
+  badge.style.right = "15px";
+  badge.style.background = "red";
+  badge.style.color = "white";
+  badge.style.borderRadius = "50%";
+  badge.style.width = "22px";
+  badge.style.height = "22px";
+  badge.style.fontSize = "12px";
+  badge.style.display = "flex";
+  badge.style.alignItems = "center";
+  badge.style.justifyContent = "center";
+  badge.style.fontWeight = "600";
+  badge.style.display = "none";
+
+  document.body.appendChild(badge);
+}
+
+function updateBadge(){
+  const badge = document.getElementById("orderBadge");
+  if(!badge) return;
+
+  if(unreadCount > 0){
+    badge.style.display = "flex";
+    badge.innerText = unreadCount;
+  }else{
+    badge.style.display = "none";
+  }
+}
+
+function clearUnread(){
+  unreadCount = 0;
+  updateBadge();
+}
 
 firebase.auth().onAuthStateChanged(async user => {
 
@@ -934,12 +977,13 @@ firebase.auth().onAuthStateChanged(async user => {
   const userDoc = await db.collection("users").doc(user.uid).get();
   if (userDoc.data()?.role !== "admin") return;
 
-  // Ask browser permission once
+  createUnreadBadge();
+
+  // Ask permission once
   if (Notification.permission !== "granted") {
     await Notification.requestPermission();
   }
 
-  // Listen for NEW pending orders
   db.collection("orders")
     .where("status", "==", "Pending")
     .onSnapshot(snapshot => {
@@ -950,14 +994,22 @@ firebase.auth().onAuthStateChanged(async user => {
 
           const orderId = change.doc.id;
 
-          // Prevent duplicate alerts
           if (notifiedOrders.has(orderId)) return;
           notifiedOrders.add(orderId);
+
+          // Increase unread count
+          unreadCount++;
+          updateBadge();
 
           // Play sound
           notificationSound.play().catch(()=>{});
 
-          // Show notification
+          // Vibrate mobile (if supported)
+          if (navigator.vibrate) {
+            navigator.vibrate([300, 150, 300]);
+          }
+
+          // Browser notification
           if (Notification.permission === "granted") {
 
             const notification = new Notification("New Order Received", {
@@ -968,11 +1020,10 @@ firebase.auth().onAuthStateChanged(async user => {
             notification.onclick = function () {
               window.focus();
               showSection("assignOrders");
+              clearUnread();
               notification.close();
             };
-
           }
-
         }
 
       });
@@ -980,6 +1031,13 @@ firebase.auth().onAuthStateChanged(async user => {
     });
 
 });
+
+// Reset counter when Assign Orders section is opened manually
+const originalLoadAssignOrders = loadAssignOrders;
+loadAssignOrders = async function(){
+  clearUnread();
+  await originalLoadAssignOrders();
+};
 
 </script>
 
