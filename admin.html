@@ -920,6 +920,66 @@ msg.remove()
 
 }
 
+/* ===========================
+   ADMIN REAL-TIME ORDER NOTIFICATIONS
+=========================== */
+
+let notifiedOrders = new Set();
+let notificationSound = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+
+firebase.auth().onAuthStateChanged(async user => {
+
+  if (!user) return;
+
+  const userDoc = await db.collection("users").doc(user.uid).get();
+  if (userDoc.data()?.role !== "admin") return;
+
+  // Ask browser permission once
+  if (Notification.permission !== "granted") {
+    await Notification.requestPermission();
+  }
+
+  // Listen for NEW pending orders
+  db.collection("orders")
+    .where("status", "==", "Pending")
+    .onSnapshot(snapshot => {
+
+      snapshot.docChanges().forEach(change => {
+
+        if (change.type === "added") {
+
+          const orderId = change.doc.id;
+
+          // Prevent duplicate alerts
+          if (notifiedOrders.has(orderId)) return;
+          notifiedOrders.add(orderId);
+
+          // Play sound
+          notificationSound.play().catch(()=>{});
+
+          // Show notification
+          if (Notification.permission === "granted") {
+
+            const notification = new Notification("New Order Received", {
+              body: "Order ID: " + orderId,
+              icon: "assets/logo.png"
+            });
+
+            notification.onclick = function () {
+              window.focus();
+              showSection("assignOrders");
+              notification.close();
+            };
+
+          }
+
+        }
+
+      });
+
+    });
+
+});
 
 </script>
 
