@@ -783,19 +783,18 @@ loadActiveOrders()
 /* SETTINGS unchanged */
 async function loadSettings(){
 
-const doc=await db.collection("settings").doc("global").get()
-const price=doc.data()?.price||75
+const doc = await db.collection("settings").doc("global").get()
+const price = doc.data()?.price || 75
 
-contentArea.innerHTML=`
+contentArea.innerHTML = `
 <div class="admin-card">
 <h2 style="margin-bottom:25px;">Bottle Pricing</h2>
 
-<div style="display:flex;justify-content:center;align-items:center;width:100%;">
+<div style="display:flex;justify-content:center;width:100%;">
 
 <div style="
 display:flex;
 align-items:center;
-justify-content:space-between;
 background:white;
 border-radius:40px;
 width:100%;
@@ -805,8 +804,7 @@ box-shadow:0 5px 20px rgba(0,0,0,.25);
 ">
 
 <button 
-onclick="changeAdminPrice(-1)"
-class="price-btn"
+onclick="changeAdminPrice(1)"
 style="
 background:#28a745;
 color:white;
@@ -837,8 +835,7 @@ color:#062c5c;
 </div>
 
 <button 
-onclick="changeAdminPrice(1)"
-class="price-btn"
+onclick="changeAdminPrice(-1)"
 style="
 background:#dc3545;
 color:white;
@@ -870,6 +867,7 @@ Save
 
 </div>`
 }
+
   
 function changeAdminPrice(change){
 const priceEl = document.getElementById("priceValue")
