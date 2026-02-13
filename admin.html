@@ -805,25 +805,17 @@ await db.collection("orders").doc(id).update({status:"Delivered"})
 loadActiveOrders()
 }
 
-/* SETTINGS unchanged */
 /* SETTINGS */
 async function loadSettings(){
 
 const doc = await db.collection("settings").doc("global").get()
 const price = doc.data()?.price || 75
 
-contentArea.innerHTML = `
+contentArea.innerHTML=`
 <div class="admin-card">
 <h2>Bottle Pricing</h2>
 
-<div style="display:flex;gap:15px;margin-top:20px;justify-content:center;align-items:center;flex-wrap:wrap;">
-
-<button 
-onclick="changeAdminPrice(-1)"
-class="price-adjust-btn minus-btn"
->
-−
-</button>
+<div style="display:flex;gap:15px;margin-top:20px;justify-content:center;align-items:center;">
 
 <div style="position:relative;">
 <span style="
@@ -833,9 +825,11 @@ top:50%;
 transform:translateY(-50%);
 color:#062c5c;
 font-weight:600;
+pointer-events:none;
 ">
 ₹
 </span>
+
 <input 
 type="number" 
 id="priceInput" 
@@ -843,13 +837,6 @@ value="${price}"
 style="width:200px;padding-left:30px;"
 >
 </div>
-
-<button 
-onclick="changeAdminPrice(1)"
-class="price-adjust-btn plus-btn"
->
-+
-</button>
 
 <button class="theme-btn" onclick="savePrice()">
 Save
@@ -860,14 +847,25 @@ Save
 </div>`
 }
 
+async function savePrice(){
 
-/* +/- FUNCTION */
-function changeAdminPrice(change){
-const input = document.getElementById("priceInput")
-let current = Number(input.value) || 1
-current += change
-if(current < 1) current = 1
-input.value = current
+await db.collection("settings").doc("global").update({
+price:Number(document.getElementById("priceInput").value)
+})
+
+const card = document.querySelector(".admin-card")
+
+const msg = document.createElement("div")
+msg.style.marginTop="20px"
+msg.style.opacity="0.9"
+msg.innerText="Price updated successfully."
+
+card.appendChild(msg)
+
+setTimeout(()=>{
+msg.remove()
+},2500)
+
 }
 
 
