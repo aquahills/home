@@ -512,6 +512,28 @@ await db.collection("orders").doc(id).update({status:"Delivered"})
 location.reload()
 }
 </script>
+<script>
+let deferredPrompt;
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+
+  const installBtn = document.createElement("button");
+  installBtn.innerText = "Install App";
+  installBtn.className = "primary-btn";
+  installBtn.style.marginTop = "20px";
+
+  document.querySelector(".hero").appendChild(installBtn);
+
+  installBtn.addEventListener("click", async () => {
+    installBtn.style.display = "none";
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+  });
+});
+</script>
 
 </body>
 </html>
