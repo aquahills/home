@@ -14,18 +14,20 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage(function(payload) {
 
   const notificationTitle = payload.notification?.title || "New Order Received";
+
   const notificationOptions = {
     body: payload.notification?.body || "A new order needs assignment",
     icon: "/assets/logo.png",
     badge: "/assets/logo.png",
     requireInteraction: true,
-    data: {
-      url: "/admin.html"
-    }
+    vibrate: [300, 100, 300],
+    tag: "new-order",
+    renotify: true
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
+
 
 // Click handling
 self.addEventListener("notificationclick", function(event) {
