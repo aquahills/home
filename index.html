@@ -413,40 +413,20 @@ if(o.status === "Delivered") continue;
 
 const userDoc = await db.collection("users").doc(o.customerId).get()
 const u = userDoc.data() || {}
-
 const addr = u.address || {}
 
-let clickableAddress;
-
-if (addr.mapLink) {
-
-  clickableAddress = `
-    <a href="${addr.mapLink}" target="_blank"
-       style="color:#00e1ff;text-decoration:underline;font-weight:600;">
-      Location
-    </a>
-  `;
-
-} else {
-
-  const fullAddress = `
-    ${addr.house || ""}
-    ${addr.street ? ", " + addr.street : ""}
-    ${addr.city ? ", " + addr.city : ""}
-    ${addr.pincode ? " - " + addr.pincode : ""}
-  `.trim();
-
-  clickableAddress = fullAddress || "No Address";
-}
-
+const fullAddress = `
+${addr.house||""},
+${addr.street||""},
+${addr.city||""} - ${addr.pincode||""}
+`
 
 rows+=`
 <tr>
 <td>${u.name||""}</td>
 <td>${u.phone||""}</td>
 <td>${o.bottles}</td>
-<td>${clickableAddress}</td>
-
+<td>${fullAddress}</td>
 <td>
 <button class="success-btn" onclick="markDelivered('${doc.id}')">
 Mark Delivered
