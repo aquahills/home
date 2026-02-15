@@ -508,26 +508,24 @@ ${rows||"<tr><td colspan='5'>No Orders</td></tr>"}
 }
 
 async function markDelivered(id) {
-  // 1. First, update the status in the database
+  // 1. Tell the database the order is delivered
   await db.collection("orders").doc(id).update({ status: "Delivered" });
 
-  // 2. Get the current logged-in user
-  const user = firebase.auth().currentUser;
-  if (!user) return;
-
-  // 3. Check the user's role to know which list to refresh
-  const userDoc = await db.collection("users").doc(user.uid).get();
-  const role = userDoc.data()?.role?.trim().toLowerCase();
-
-  // 4. "Re-draw" the list without refreshing the whole page
-  if (role === "delivery") {
-    // Refresh the delivery agent's specific list
-    loadAssignedOrders(user.uid); 
-  } else if (role === "admin") {
-    // Refresh the admin's active orders list
-    loadActiveOrders(); 
-  }
+  // 2. THE MAGIC: Find the button you just clicked and hide its entire row immediately
+  // This makes the order "vanish" from the list without needing to reload anything.
+  const allButtons = document.querySelectorAll('button');
+  allButtons.forEach(btn => {
+    if (btn.getAttribute('onclick') === `markDelivered('${id}')`) {
+      const row = btn.closest('tr'); // Find the table row containing this button
+      if (row) {
+        row.style.transition = "0.5s";
+        row.style.opacity = "0"; // Fade out
+        setTimeout(() => row.remove(), 500); // Remove from screen after fade
+      }
+    }
+  });
 }
+
 </script>
 <script>
 let deferredPrompt;
